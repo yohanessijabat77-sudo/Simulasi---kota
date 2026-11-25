@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Simulasi Kota: INDONESIA MERDEKA</title>
+  <style>
+    :root {
+      --merah: #9e1b24;
+      --merah-gelap: #6e1017;
+      --hijau: #14532d;
+      --hijau-muda: #166534;
+      --emas: #eab308;
+      --bg: #f4f5f7;
+      --kartu: #ffffff;
+      --teks: #18181b;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--teks);
+      padding-bottom: 28px;
+    }
+
+    /* HEADER TOP */
+    .topbar {
+      background: #0f172a;
+      color: #fff;
+      padding: 12px 14px;
+      border-bottom: 3px solid var(--merah);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .topbar h1 {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+    .topbar .sub {
+      font-size: 11px;
+      color: #cbd5e1;
+      margin-top: 2px;
+    }
+    .top-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-top {
+      background: #fff;
+      color: #0f172a;
+      border: none;
+      border-radius: 999px;
+      padding: 5px 11px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-top:active { transform: scale(0.97); }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--kartu);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    /* PETA KOTA ANIMASI LIVE */
+    .map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .map-header h2 {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .badge-live {
+      background: #dcfce7;
+      color: #166534;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #86efac;
+    }
+
+    .city-stage {
+      position: relative;
+      width: 100%;
+      height: 290px;
+      background:
+        radial-gradient(circle at 18% 22%, #dcfce7 0%, transparent 42%),
+        radial-gradient(circle at 82% 78%, #fef9c3 0%, transparent 42%),
+        #e2e8f0;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    /* JALAN RAYA */
+    .road-h {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 28px;
+      background: #475569;
+      border-top: 2px dashed #f8fafc;
+      border-bottom: 2px dashed #f8fafc;
+      transform: translateY(-50%);
+    }
+    .road-v {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 28px;
+      height: 100%;
+      background: #475569;
+      border-left: 2px dashed #f8fafc;
+      border-right: 2px dashed #f8fafc;
+      transform: translateX(-50%);
+    }
+
+    /* LOKASI / SEKTOR */
+    .spot {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1.5px solid #94a3b8;
+      border-radius: 9px;
+      padding: 4px 6px;
+      text-align: center;
+      font-size: 9px;
+      z-index: 4;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+      user-select: none;
+    }
+    .spot b { display: block; color: #0f172a; font-size: 9px; }
+    .spot span { font-size: 15px; display: block; }
+
+    #s-balai   { top: 8px; left: 8px; border-color: var(--merah); }
+    #s-paket   { top: 8px; left: 50%; transform: translateX(-50%); }
+    #s-stasiun { top: 8px; right: 8px; border-color: var(--emas); }
+    #s-baju    { bottom: 8px; left: 8px; }
+    #s-aceh    { bottom: 8px; left: 30%; }
+    #s-minang  { bottom: 8px; right: 30%; }
+    #s-batak   { bottom: 8px; right: 8px; }
+
+    /* AVATAR BERGERAK DI PETA */
+    .avatar-node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+      transition: left 0.14s linear, top 0.14s linear;
+    }
+    .avatar-tag {
+      background: rgba(15, 23, 42, 0.92);
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 8.5px;
+      white-space: nowrap;
+      margin-bottom: 3px;
+      border: 1px solid var(--emas);
+      text-align: center;
+    }
+    .avatar-tag .t-name { font-weight: 800; color: #fde047; }
+    .avatar-tag .t-act { display: block; color: #a7f3d0; font-size: 8px; }
+
+    .avatar-circle {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2.5px solid var(--emas);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.22);
+    }
+    .avatar-circle.controlled {
+      border-color: var(--merah);
+      box-shadow: 0 0 0 3px rgba(158, 27, 36, 0.25);
+    }
+    .avatar-circle.flip { transform: scaleX(-1); }
+
+    @keyframes stepWalk {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      25% { transform: translateY(-4px) rotate(-7deg); }
+      75% { transform: translateY(-4px) rotate(7deg); }
+    }
+    @keyframes stepWalkFlip {
+      0%, 100% { transform: scaleX(-1) translateY(0px) rotate(0deg); }
+      25% { transform: scaleX(-1) translateY(-4px) rotate(-7deg); }
+      75% { transform: scaleX(-1) translateY(-4px) rotate(7deg); }
+    }
+    .avatar-node.walking .avatar-circle { animation: stepWalk 0.34s infinite ease-in-out; }
+    .avatar-node.walking .avatar-circle.flip { animation: stepWalkFlip 0.34s infinite ease-in-out; }
+
+    .avatar-prop {
+      position: absolute;
+      right: -9px;
+      top: -4px;
+      font-size: 12px;
+    }
+
+    /* KONTROL AKSI & ARAH */
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .btn-act {
+      padding: 8px;
+      border: none;
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+      background: var(--merah);
+    }
+    .btn-act.green { background: var(--hijau-muda); }
+    .btn-act.gold { background: #b45309; }
+    .btn-act.dark { background: #334155; }
+    .btn-act:active { transform: scale(0.98); }
+
+    .dpad-bar {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .dpad-btn {
+      width: 38px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      font-weight: 800;
+      font-size: 13px;
+      color: #0f172a;
+      cursor: pointer;
+    }
+    .dpad-btn:active { background: var(--merah); color: #fff; }
+
+    /* PROYEK STASIUN */
+    .prog-track {
+      width: 100%;
+      height: 9px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--merah), var(--emas));
+      width: 15%;
+      transition: width 0.3s ease;
+    }
+
+    /* KARTU KTP MASYARAKAT */
+    .ktp-card {
+      border: 2px solid var(--merah);
+      background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .ktp-title {
+      color: var(--merah);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.3px;
+    }
+    .ktp-badge {
+      display: inline-block;
+      background: var(--merah);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-top: 6px;
+    }
+    .ktp-divider {
+      height: 1.5px;
+      background: #fecaca;
+      margin: 10px 0;
+    }
+    .ktp-body {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .ktp-avatar-box {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 2.5px solid var(--emas);
+      background: #fef9c3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .ktp-fields p {
+      margin-bottom: 5px;
+    }
+    .ktp-fields small {
+      display: block;
+      font-size: 9.5px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .ktp-fields strong {
+      font-size: 13px;
+      color: #111827;
+    }
+
+    /* DAFTAR WARGA TERDAFTAR */
+    .citizen-item {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      margin-top: 8px;
+      background: #fff;
+    }
+    .citizen-item.active {
+      border-color: #fecaca;
+      background: #fff7f7;
+    }
+    .citizen-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .citizen-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--emas);
+      background: #fefce8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .btn-control {
+      margin-top: 8px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .btn-control.is-active {
+      background: var(--hijau);
+      color: #fff;
+    }
+
+    /* LOG AKTIVITAS */
+    .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .log-item {
+      background: #f8fafc;
+      border-left: 3.5px solid var(--hijau-muda);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 11.5px;
+      line-height: 1.35;
+    }
+
+    /* MODAL */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.72);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+    }
+    .modal-box {
+      background: #fff;
+      border: 2px solid var(--merah);
+      border-radius: 14px;
+      padding: 14px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .modal-box input, .modal-box select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin: 4px 0 9px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <h1>SIMULASI KOTA • INDONESIA MERDEKA</h1>
+    <div class="sub" id="top-sub">Kontrol Karakter Mandiri per Perangkat • Day 1</div>
+    <div class="top-actions">
+      <button class="btn-top" id="btn-next-day">+1 Hari</button>
+      <button class="btn-top" id="btn-backup">Backup JSON</button>
+      <button class="btn-top" id="btn-import">Import JSON</button>
+      <input type="file" id="file-import" accept=".json" style="display:none;" />
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- PETA KOTA & ANIMASI BERJALAN / AKTIVITAS -->
+    <section class="card">
+      <div class="map-header">
+        <h2>🗺️ Peta Kota &amp; Aktivitas Warga</h2>
+        <span class="badge-live" id="auto-status-pill">AUTO BERGERAK</span>
+      </div>
+
+      <div class="city-stage" id="city-stage" title="Ketuk peta atau bangunan untuk berjalan">
+        <div class="road-h"></div>
+        <div class="road-v"></div>
+
+        <div class="spot" id="s-balai" data-x="15" data-y="18">
+          <span>🏛️</span><b>Balai Kota</b>
+        </div>
+        <div class="spot" id="s-paket" data-x="50" data-y="18">
+          <span>📦</span><b>Pos Paket</b>
+        </div>
+        <div class="spot" id="s-stasiun" data-x="85" data-y="18">
+          <span>🚂</span><b>Stasiun Kota</b>
+        </div>
+
+        <div class="spot" id="s-baju" data-x="14" data-y="80">
+          <span>👕</span><b>Toko Baju</b>
+        </div>
+        <div class="spot" id="s-aceh" data-x="37" data-y="80">
+          <span>🍜</span><b>RM Aceh</b>
+        </div>
+        <div class="spot" id="s-minang" data-x="63" data-y="80">
+          <span>🍛</span><b>RM Minang</b>
+        </div>
+        <div class="spot" id="s-batak" data-x="86" data-y="80">
+          <span>🍖</span><b>RM Batak (BPK)</b>
+        </div>
+
+        <div id="map-avatars"></div>
+      </div>
+
+      <div class="action-row">
+        <button class="btn-act" id="btn-do-work">⚡ Kerja &amp; Gerak</button>
+        <button class="btn-act green" id="btn-patungan">🚂 Patungan Stasiun</button>
+        <button class="btn-act gold" id="btn-open-ktp">+ Daftar / Edit KTP</button>
+        <button class="btn-act dark" id="btn-toggle-auto">🔄 Toggle Auto</button>
+      </div>
+
+      <div class="dpad-bar">
+        <button type="button" class="dpad-btn" data-dx="-6" data-dy="0">◀</button>
+        <button type="button" class="dpad-btn" data-dx="0" data-dy="-6">▲</button>
+        <button type="button" class="dpad-btn" data-dx="0" data-dy="6">▼</button>
+        <button type="button" class="dpad-btn" data-dx="6" data-dy="0">▶</button>
+      </div>
+    </section>
+
+    <!-- PROYEK PATUNGAN STASIUN KOTA -->
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;">
+        <span>🚂 Patungan Stasiun Kota</span>
+        <span id="station-progress-label">7.500 / 50.000 Poin</span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill" id="station-progress-fill"></div>
+      </div>
+    </section>
+
+    <!-- KARTU KTP MASYARAKAT "INDONESIA MERDEKA" -->
+    <section class="ktp-card" id="ktp-card">
+      <div class="ktp-title">KTP MASYARAKAT "INDONESIA MERDEKA"</div>
+      <div class="ktp-badge" id="ktp-member-badge">ANGGOTA KE-1</div>
+      <div class="ktp-divider"></div>
+      <div class="ktp-body">
+        <div class="ktp-avatar-box" id="ktp-avatar-icon">👕</div>
+        <div class="ktp-fields">
+          <p><small>NAMA</small><strong id="ktp-nama">Yohanes</strong></p>
+          <p><small>NAMA PANGGILAN</small><strong id="ktp-panggilan">yohan</strong></p>
+          <p><small>JABATAN</small><strong id="ktp-jabatan">Presiden</strong></p>
+          <p style="margin-bottom:0;"><small>PEKERJAAN &amp; BONUS</small><strong id="ktp-pekerjaan">Toko Baju</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DAFTAR WARGA TERDAFTAR -->
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2 style="font-size:14px;font-weight:800;">Daftar Warga Terdaftar (Pilih Kontrol Perangkat)</h2>
+      </div>
+      <button class="btn-act dark" id="btn-reset-kota" style="width:auto;padding:6px 12px;margin-top:8px;">Reset Kota</button>
+      <div id="citizens-list"></div>
+    </section>
+
+    <!-- LOG AKTIVITAS KOTA -->
+    <section class="card">
+      <h2 style="font-size:14px;font-weight:800;">🪵 Log Aktivitas Kota</h2>
+      <p style="font-size:11px;color:var(--muted);margin-top:2px;">
+        Avatar pemain otomatis muncul di setiap aktivitas kerja, belanja, gerak sektor, dan patungan.
+      </p>
+      <div class="log-list" id="log-list"></div>
+    </section>
+  </div>
+
+  <!-- MODAL DAFTAR / EDIT KTP -->
+  <div class="modal-backdrop" id="ktp-modal">
+    <div class="modal-box">
+      <h3 style="font-size:14px;font-weight:800;color:var(--merah);margin-bottom:4px;">KTP MASYARAKAT "INDONESIA MERDEKA"</h3>
+      <p style="font-size:10.5px;color:var(--muted);margin-bottom:8px;">
+        Urutan jabatan: #1 Presiden, #2–#50 Perdana Menteri, #51–#101 Gubernur, #102+ Masyarakat.
+      </p>
+
+      <label style="font-size:11px;font-weight:700;">Nama Lengkap</label>
+      <input type="text" id="in-nama" placeholder="Contoh: Yohanes" />
+
+      <label style="font-size:11px;font-weight:700;">Nama Panggilan</label>
+      <input type="text" id="in-panggilan" placeholder="Contoh: yohan" />
+
+      <label style="font-size:11px;font-weight:700;">Nomor Member Instagram</label>
+      <input type="number" id="in-nomor" min="1" placeholder="1" />
+
+      <label style="font-size:11px;font-weight:700;">Pekerjaan</label>
+      <select id="in-job">
+        <option value="Toko Baju">Toko Baju</option>
+        <option value="Pengantar Paket">Pengantar Paket</option>
+        <option value="Rumah Makan Aceh">Rumah Makan Aceh</option>
+        <option value="Rumah Makan Minang">Rumah Makan Minang</option>
+        <option value="Rumah Makan Batak (BPK)">Rumah Makan Batak (BPK)</option>
+      </select>
+
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn-act dark" id="btn-close-ktp" style="flex:1;">Batal</button>
+        <button class="btn-act" id="btn-save-ktp" style="flex:1;">Simpan KTP</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const KEY = 'simulasi_kota_merdeka_ktp_anim_v1';
+
+    const JOB_META = {
+      'Toko Baju': {
+        icon: '👕',
+        prop: '👕',
+        points: 120,
+        energyCost: 15,
+        spots: [
+          { x: 14, y: 80, text: '👕 Rapikan stok baju' },
+          { x: 24, y: 56, text: '🛍️ Antar pesanan baju' }
+        ]
+      },
+      'Pengantar Paket': {
+        icon: '📦',
+        prop: '📦',
+        points: 140,
+        energyCost: 18,
+        spots: [
+          { x: 50, y: 18, text: '📦 Ambil paket di Pos' },
+          { x: 50, y: 50, text: '🛵 Melaju di jalan kota' },
+          { x: 78, y: 50, text: '📦 Kirim paket ke warga' }
+        ]
+      },
+      'Rumah Makan Aceh': {
+        icon: '🍜',
+        prop: '🍜',
+        points: 130,
+        energyCost: 15,
+        spots: [
+          { x: 37, y: 80, text: '🍜 Masak Mie Aceh' },
+          { x: 37, y: 56, text: '☕ Sajikan kopi & hidangan' }
+        ]
+      },
+      'Rumah Makan Minang': {
+        icon: '🍛',
+        prop: '🍛',
+        points: 135,
+        energyCost: 15,
+        spots: [
+          { x: 63, y: 80, text: '🍛 Siapkan Rendang Minang' },
+          { x: 63, y: 56, text: '🍽️ Layani meja RM Minang' }
+        ]
+      },
+      'Rumah Makan Batak (BPK)': {
+        icon: '🍖',
+        prop: '🍖',
+        points: 145,
+        energyCost: 16,
+        spots: [
+          { x: 86, y: 80, text: '🍖 Panggang BPK & Saksang' },
+          { x: 86, y: 56, text: '🍽️ Hidangkan menu Batak' }
+        ]
+      }
+    };
+
+    function jabatanDariNomor(no) {
+      const n = Number(no) || 1;
+      if (n === 1) return 'Presiden';
+      if (n >= 2 && n <= 50) return 'Perdana Menteri';
+      if (n >= 51 && n <= 101) return 'Gubernur';
+      return 'Masyarakat';
+    }
+
+    function waktuSekarang() {
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${hh}.${mm}`;
+    }
+
+    const initialState = () => ({
+      day: 1,
+      stationFunds: 7500,
+      stationTarget: 50000,
+      autoMove: true,
+      controlledId: 'w1',
+      citizens: [
+        {
+          id: 'w1',
+          memberNo: 1,
+          nama: 'Yohanes',
+          panggilan: 'yohan',
+          jabatan: 'Presiden',
+          job: 'Toko Baju',
+          poin: 500,
+          energi: 100,
+          maxEnergi: 100,
+          x: 14,
+          y: 80,
+          targetX: 14,
+          targetY: 80,
+          spotIdx: 0,
+          flip: false,
+          walking: false,
+          statusText: '👕 Jaga Toko Baju'
+        }
+      ],
+      logs: [
+        `[Day 1 • ${waktuSekarang()}] KTP terbit: Anggota Ke-1 (yohan • Presiden) bergabung sebagai Toko Baju.`,
+        `[Day 1 • ${waktuSekarang()}] Simulasi Kota INDONESIA MERDEKA siap dimulai. Terbitkan KTP anggota pertama!`
+      ]
+    });
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return initialState();
+        const p = JSON.parse(raw);
+        if (!Array.isArray(p.citizens) || p.citizens.length === 0) return initialState();
+        return { ...initialState(), ...p };
+      } catch {
+        return initialState();
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(state));
+      } catch {}
+    }
+
+    function addLog(msg) {
+      state.logs.unshift(`[Day ${state.day} • ${waktuSekarang()}] ${msg}`);
+      if (state.logs.length > 35) state.logs.length = 35;
+      renderLogs();
+      saveState();
+    }
+
+    function getControlled() {
+      return state.citizens.find(c => c.id === state.controlledId) || state.citizens[0];
+    }
+
+    function moveCitizen(c, speed = 1.8) {
+      const dx = c.targetX - c.x;
+      const dy = c.targetY - c.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > 0.7) {
+        if (Math.abs(dx) > 0.15) c.flip = dx < 0;
+        const step = Math.min(speed, dist);
+        c.x += (dx / dist) * step;
+        c.y += (dy / dist) * step;
+        c.walking = true;
+        return false;
+      }
+      c.x = c.targetX;
+      c.y = c.targetY;
+      c.walking = false;
+      return true;
+    }
+
+    function stepCitizenRoutine(c) {
+      const meta = JOB_META[c.job] || JOB_META['Toko Baju'];
+      const spots = meta.spots;
+      const sp = spots[c.spotIdx % spots.length];
+      c.targetX = sp.x;
+      c.targetY = sp.y;
+      const arrived = moveCitizen(c, c.id === state.controlledId ? 2.0 : 1.3);
+      if (arrived) {
+        c.statusText = sp.text;
+        c.spotIdx = (c.spotIdx + 1) % spots.length;
+      }
+    }
+
+    function renderMapAvatars() {
+      const wrap = document.getElementById('map-avatars');
+      wrap.innerHTML = '';
+      state.citizens.forEach(c => {
+        const meta = JOB_META[c.job] || JOB_META['Toko Baju'];
+        const isCtrl = c.id === state.controlledId;
+        const div = document.createElement('div');
+        div.className = 'avatar-node' + (c.walking ? ' walking' : '');
+        div.style.left = c.x + '%';
+        div.style.top = c.y + '%';
+        div.innerHTML = `
+          <div class="avatar-tag">
+            <span class="t-name">${c.panggilan} #${c.memberNo}</span>
+            <span class="t-act">${c.statusText || meta.icon + ' ' + c.job}</span>
+          </div>
+          <div class="avatar-circle ${isCtrl ? 'controlled' : ''} ${c.flip ? 'flip' : ''}">
+            <span>${meta.icon}</span>
+            <span class="avatar-prop">${meta.prop}</span>
+          </div>
+        `;
+        wrap.appendChild(div);
+      });
+    }
+
+    function renderKTP() {
+      const c = getControlled();
+      c.jabatan = jabatanDariNomor(c.memberNo);
+      const meta = JOB_META[c.job] || JOB_META['Toko Baju'];
+
+      document.getElementById('top-sub').textContent = `Kontrol Karakter Mandiri per Perangkat • Day ${state.day}`;
+      document.getElementById('ktp-member-badge').textContent = `ANGGOTA KE-${c.memberNo}`;
+      document.getElementById('ktp-avatar-icon').textContent = meta.icon;
+      document.getElementById('ktp-nama').textContent = c.nama;
+      document.getElementById('ktp-panggilan').textContent = c.panggilan;
+      document.getElementById('ktp-jabatan').textContent = c.jabatan;
+      document.getElementById('ktp-pekerjaan').textContent = c.job;
+
+      document.getElementById('station-progress-label').textContent =
+        `${state.stationFunds.toLocaleString('id-ID')} / ${state.stationTarget.toLocaleString('id-ID')} Poin`;
+      const pct = Math.min(100, Math.round((state.stationFunds / state.stationTarget) * 100));
+      document.getElementById('station-progress-fill').style.width = pct + '%';
+
+      const pill = document.getElementById('auto-status-pill');
+      pill.textContent = state.autoMove ? 'AUTO BERGERAK' : 'AUTO JEDA';
+    }
+
+    function renderCitizensList() {
+      const list = document.getElementById('citizens-list');
+      list.innerHTML = '';
+      state.citizens.forEach(c => {
+        const meta = JOB_META[c.job] || JOB_META['Toko Baju'];
+        const isCtrl = c.id === state.controlledId;
+        const item = document.createElement('div');
+        item.className = 'citizen-item' + (isCtrl ? ' active' : '');
+        item.innerHTML = `
+          <div class="citizen-top">
+            <div class="citizen-icon">${meta.icon}</div>
+            <div>
+              <div style="font-size:12.5px;font-weight:800;">
+                #${c.memberNo} ${c.panggilan} (${c.nama}) • <span style="color:var(--merah);">${c.jabatan}</span>
+              </div>
+              <div style="font-size:11px;color:#4b5563;margin-top:2px;">
+                Kerja: ${c.job} • 🪙 ${c.poin.toLocaleString('id-ID')} Poin • ⚡ ${c.energi}/${c.maxEnergi}
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn-control ${isCtrl ? 'is-active' : ''}" data-cid="${c.id}">
+            ${isCtrl ? 'Sedang Dikontrol' : 'Kontrol Warga Ini'}
+          </button>
+        `;
+        list.appendChild(item);
+      });
+
+      list.querySelectorAll('.btn-control').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.controlledId = btn.dataset.cid;
+          const chosen = getControlled();
+          addLog(`Perangkat beralih mengontrol #${chosen.memberNo} ${chosen.panggilan} (${chosen.jabatan}).`);
+          renderKTP();
+          renderCitizensList();
+          renderMapAvatars();
+          saveState();
+        });
+      });
+    }
+
+    function renderLogs() {
+      const box = document.getElementById('log-list');
+      box.innerHTML = state.logs.map(line => `<div class="log-item">${line}</div>`).join('');
+    }
+
+    // AKSI KERJA & GERAK
+    document.getElementById('btn-do-work').addEventListener('click', () => {
+      const c = getControlled();
+      const meta = JOB_META[c.job] || JOB_META['Toko Baju'];
+      if (c.energi < meta.energyCost) {
+        addLog(`${c.panggilan} kehabisan energi! Tekan +1 Hari untuk memulihkan energi.`);
+        return;
+      }
+      c.energi -= meta.energyCost;
+      c.poin += meta.points;
+      const sp = meta.spots[c.spotIdx % meta.spots.length];
+      c.targetX = sp.x;
+      c.targetY = sp.y;
+      c.statusText = sp.text;
+      c.spotIdx = (c.spotIdx + 1) % meta.spots.length;
+
+      addLog(`${c.panggilan} (${c.job}) ${sp.text.toLowerCase()} dan meraih +${meta.points} poin.`);
+      renderKTP();
+      renderCitizensList();
+      saveState();
+    });
+
+    // AKSI PATUNGAN STASIUN KOTA
+    document.getElementById('btn-patungan').addEventListener('click', () => {
+      const c = getControlled();
+      const iuran = 250;
+      if (c.poin < iuran) {
+        addLog(`Poin ${c.panggilan} belum cukup untuk patungan ${iuran} poin.`);
+        return;
+      }
+      c.poin -= iuran;
+      state.stationFunds = Math.min(state.stationTarget, state.stationFunds + iuran);
+      c.targetX = 85;
+      c.targetY = 18;
+      c.statusText = '🚂 Patungan Stasiun';
+      addLog(`${c.panggilan} (#${c.memberNo} ${c.jabatan}) menyumbang ${iuran} poin ke Proyek Stasiun Kota.`);
+      renderKTP();
+      renderCitizensList();
+      saveState();
+    });
+
+    // TOGGLE AUTO
+    document.getElementById('btn-toggle-auto').addEventListener('click', () => {
+      state.autoMove = !state.autoMove;
+      addLog(state.autoMove ? 'Gerak otomatis warga diaktifkan.' : 'Gerak otomatis warga dijeda.');
+      renderKTP();
+      saveState();
+    });
+
+    // +1 HARI
+    document.getElementById('btn-next-day').addEventListener('click', () => {
+      state.day += 1;
+      state.citizens.forEach(c => {
+        c.energi = c.maxEnergi;
+      });
+      addLog(`Hari berganti ke Day ${state.day}. Energi seluruh warga dipulihkan penuh.`);
+      renderKTP();
+      renderCitizensList();
+      saveState();
+    });
+
+    // D-PAD & KLIK PETA
+    document.querySelectorAll('.dpad-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const c = getControlled();
+        c.targetX = Math.max(8, Math.min(92, c.x + Number(btn.dataset.dx)));
+        c.targetY = Math.max(14, Math.min(86, c.y + Number(btn.dataset.dy)));
+        c.statusText = '🚶 Jalan manual';
+        saveState();
+      });
+    });
+
+    document.getElementById('city-stage').addEventListener('click', (e) => {
+      const c = getControlled();
+      const spot = e.target.closest('.spot');
+      if (spot) {
+        c.targetX = Number(spot.dataset.x);
+        c.targetY = Number(spot.dataset.y);
+        const namaSpot = spot.querySelector('b').textContent;
+        c.statusText = `🚶 Menuju ${namaSpot}`;
+        addLog(`${c.panggilan} berjalan menuju ${namaSpot}.`);
+        saveState();
+        return;
+      }
+      const rect = e.currentTarget.getBoundingClientRect();
+      c.targetX = Math.max(8, Math.min(92, ((e.clientX - rect.left) / rect.width) * 100));
+      c.targetY = Math.max(14, Math.min(86, ((e.clientY - rect.top) / rect.height) * 100));
+      c.statusText = '🚶 Jalan ke sektor';
+      saveState();
+    });
+
+    // MODAL KTP
+    const ktpModal = document.getElementById('ktp-modal');
+    document.getElementById('btn-open-ktp').addEventListener('click', () => {
+      const c = getControlled();
+      document.getElementById('in-nama').value = c.nama;
+      document.getElementById('in-panggilan').value = c.panggilan;
+      document.getElementById('in-nomor').value = c.memberNo;
+      document.getElementById('in-job').value = c.job;
+      ktpModal.style.display = 'flex';
+    });
+
+    document.getElementById('btn-close-ktp').addEventListener('click', () => {
+      ktpModal.style.display = 'none';
+    });
+
+    document.getElementById('btn-save-ktp').addEventListener('click', () => {
+      const nama = document.getElementById('in-nama').value.trim();
+      const panggilan = document.getElementById('in-panggilan').value.trim();
+      const memberNo = parseInt(document.getElementById('in-nomor').value, 10);
+      const job = document.getElementById('in-job').value;
+      if (!nama || !panggilan || !memberNo || memberNo < 1) return;
+
+      const jabatan = jabatanDariNomor(memberNo);
+      const existing = state.citizens.find(x => Number(x.memberNo) === memberNo);
+
+      if (existing) {
+        existing.nama = nama;
+        existing.panggilan = panggilan;
+        existing.jabatan = jabatan;
+        existing.job = job;
+        existing.statusText = `${JOB_META[job].icon} ${job}`;
+        state.controlledId = existing.id;
+        addLog(`KTP diperbarui: Anggota Ke-${memberNo} (${panggilan} • ${jabatan}) bekerja di ${job}.`);
+      } else {
+        const newCitizen = {
+          id: 'w_' + memberNo + '_' + Date.now(),
+          memberNo,
+          nama,
+          panggilan,
+          jabatan,
+          job,
+          poin: 500,
+          energi: 100,
+          maxEnergi: 100,
+          x: 50,
+          y: 50,
+          targetX: (JOB_META[job]?.spots?.[0]?.x) || 50,
+          targetY: (JOB_META[job]?.spots?.[0]?.y) || 50,
+          spotIdx: 0,
+          flip: false,
+          walking: true,
+          statusText: `${JOB_META[job]?.icon || '🧑'} Bergabung (${job})`
+        };
+        state.citizens.push(newCitizen);
+        state.controlledId = newCitizen.id;
+        addLog(`KTP terbit: Anggota Ke-${memberNo} (${panggilan} • ${jabatan}) bergabung sebagai ${job}.`);
+      }
+
+      ktpModal.style.display = 'none';
+      renderKTP();
+      renderCitizensList();
+      renderMapAvatars();
+      saveState();
+    });
+
+    // BACKUP & IMPORT JSON
+    document.getElementById('btn-backup').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `simulasi-kota-day-${state.day}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      addLog('Backup JSON berhasil diunduh.');
+    });
+
+    const fileInput = document.getElementById('file-import');
+    document.getElementById('btn-import').addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const imported = JSON.parse(reader.result);
+          if (Array.isArray(imported.citizens) && imported.citizens.length) {
+            state = { ...initialState(), ...imported };
+            saveState();
+            renderKTP();
+            renderCitizensList();
+            renderMapAvatars();
+            renderLogs();
+            addLog('Data kota berhasil diimpor dari file JSON.');
+          }
+        } catch {}
+      };
+      reader.readAsText(file);
+    });
+
+    // RESET KOTA
+    document.getElementById('btn-reset-kota').addEventListener('click', () => {
+      state = initialState();
+      saveState();
+      renderKTP();
+      renderCitizensList();
+      renderMapAvatars();
+      renderLogs();
+    });
+
+    // LOOP ANIMASI
+    setInterval(() => {
+      state.citizens.forEach(c => {
+        if (state.autoMove) {
+          stepCitizenRoutine(c);
+        } else {
+          moveCitizen(c, 2.0);
+        }
+      });
+      renderMapAvatars();
+    }, 60);
+
+    renderKTP();
+    renderCitizensList();
+    renderMapAvatars();
+    renderLogs();
+  </script>
+</body>
+</html>
