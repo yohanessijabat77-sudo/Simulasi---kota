@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Simulasi Kota: INDONESIA MERDEKA — HD Edition</title>
+<style>
+  :root {
+    --bg-dark: #0b1120;
+    --panel-bg: rgba(15, 23, 42, 0.88);
+    --border-gold: rgba(251, 191, 36, 0.45);
+    --red-id: #dc2626;
+    --gold: #fbbf24;
+    --emerald: #10b981;
+    --sky: #38bdf8;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+
+  /* CANVAS UTAMA HD */
+  #gameCanvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    touch-action: none;
+  }
+
+  /* TOP HUD */
+  .top-hud {
+    position: fixed;
+    top: env(safe-area-inset-top, 10px);
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .hud-card {
+    pointer-events: auto;
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-gold);
+    border-radius: 14px;
+    padding: 8px 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  .brand-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+  }
+
+  .flag-badge {
+    width: 22px;
+    height: 15px;
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.4);
+    flex-shrink: 0;
+  }
+  .flag-badge .r { height: 50%; background: #ef4444; }
+  .flag-badge .w { height: 50%; background: #ffffff; }
+
+  .player-pill {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #e2e8f0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .role-badge {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    border: 1px solid #fca5a5;
+    color: #fff;
+    font-weight: 700;
+    font-size: 10px;
+    padding: 1px 7px;
+    border-radius: 999px;
+  }
+
+  .money-badge {
+    background: rgba(16, 185, 129, 0.18);
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    color: #6ee7b7;
+    font-weight: 700;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 8px;
+  }
+
+  .hud-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .btn-hud {
+    pointer-events: auto;
+    background: var(--panel-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #f8fafc;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 7px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    transition: transform 0.12s, background 0.15s;
+  }
+  .btn-hud:active { transform: scale(0.95); }
+  .btn-hud.gold {
+    border-color: var(--border-gold);
+    color: #fde68a;
+  }
+
+  /* ACTIVITY FEED & STATUS MISI */
+  .side-feed {
+    position: fixed;
+    top: 76px;
+    right: 10px;
+    width: 225px;
+    max-width: 44vw;
+    pointer-events: none;
+    z-index: 18;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .mission-box {
+    pointer-events: auto;
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    border-radius: 12px;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .mission-title {
+    font-weight: 800;
+    color: #7dd3fc;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 3px;
+  }
+
+  .mission-desc {
+    color: #f1f5f9;
+    line-height: 1.35;
+  }
+
+  .feed-list {
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 6px 9px;
+    max-height: 110px;
+    overflow: hidden;
+    font-size: 10px;
+    color: #cbd5e1;
+  }
+
+  .feed-item {
+    padding: 2px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.08);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .feed-item:last-child { border-bottom: none; }
+
+  /* ANALOG JOYSTICK ALA MOBILE LEGENDS (KIRI BAWAH) */
+  .joystick-zone {
+    position: fixed;
+    left: 16px;
+    bottom: calc(env(safe-area-inset-bottom, 12px) + 12px);
+    width: 140px;
+    height: 140px;
+    z-index: 25;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .joystick-base {
+    width: 118px;
+    height: 118px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(15,23,42,0.35) 0%, rgba(30,41,59,0.72) 70%, rgba(251,191,36,0.35) 100%);
+    border: 2px solid rgba(251, 191, 36, 0.55);
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.55), inset 0 0 16px rgba(251, 191, 36, 0.18);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .joystick-ring {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    border: 1px dashed rgba(255, 255, 255, 0.25);
+    pointer-events: none;
+  }
+
+  .joystick-arrow {
+    position: absolute;
+    font-size: 9px;
+    color: rgba(253, 230, 138, 0.65);
+    pointer-events: none;
+  }
+  .joystick-arrow.up { top: 6px; }
+  .joystick-arrow.down { bottom: 6px; }
+  .joystick-arrow.left { left: 8px; }
+  .joystick-arrow.right { right: 8px; }
+
+  .joystick-knob {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fef08a, #f59e0b 65%, #b45309 100%);
+    border: 2px solid #fffbeb;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.65), 0 0 12px rgba(251, 191, 36, 0.55);
+    transform: translate(0px, 0px);
+    transition: transform 0.05s linear;
+    pointer-events: none;
+  }
+
+  /* TOMBOL AKSI & CHAT (KANAN BAWAH) */
+  .bottom-right-controls {
+    position: fixed;
+    right: 14px;
+    bottom: calc(env(safe-area-inset-bottom, 12px) + 12px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    z-index: 25;
+  }
+
+  .action-buttons-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn-action-main {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: 2px solid #a7f3d0;
+    color: #fff;
+    font-weight: 800;
+    font-size: 12px;
+    padding: 12px 16px;
+    border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-action-main.delivering {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-color: #fde68a;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+  }
+  .btn-action-main:active { transform: scale(0.95); }
+
+  .chat-bar {
+    display: flex;
+    background: var(--panel-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px;
+    padding: 4px 6px 4px 12px;
+    width: 230px;
+    max-width: 52vw;
+  }
+
+  .chat-bar input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 11.5px;
+    min-width: 0;
+  }
+
+  .chat-bar button {
+    background: #2563eb;
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 11px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  /* MODAL GATE & E-KTP */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.84);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    z-index: 50;
+  }
+  .modal-backdrop.hidden { display: none; }
+
+  .modal-card {
+    width: 100%;
+    max-width: 440px;
+    max-height: 92vh;
+    overflow-y: auto;
+    background: linear-gradient(165deg, #0f172a 0%, #1e293b 100%);
+    border: 1.5px solid var(--border-gold);
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+  }
+
+  .modal-header h2 {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fde68a;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #cbd5e1;
+    margin-bottom: 4px;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    color: #fff;
+    padding: 9px 11px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    outline: none;
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--gold);
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    border: 1px solid #fca5a5;
+    color: #fff;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 11px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+
+  /* E-KTP DESIGN */
+  .ektp-card {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #1e3a8a 100%);
+    border: 2px solid #bae6fd;
+    border-radius: 16px;
+    padding: 14px;
+    color: #fff;
+    box-shadow: 0 12px 30px rgba(2, 132, 199, 0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .ektp-header {
+    text-align: center;
+    border-bottom: 1.5px solid rgba(255,255,255,0.4);
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+  }
+  .ektp-header .rep { font-size: 10px; letter-spacing: 1.2px; opacity: 0.9; }
+  .ektp-header .title { font-size: 14px; font-weight: 900; letter-spacing: 0.8px; color: #fef08a; }
+  .ektp-body {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    font-size: 11.5px;
+  }
+  .ektp-row { margin-bottom: 4px; }
+  .ektp-row span { opacity: 0.8; display: inline-block; width: 92px; }
+  .ektp-photo {
+    width: 68px;
+    height: 82px;
+    background: #dc2626;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 24px;
+  }
+
+  .citizen-list {
+    margin-top: 10px;
+    max-height: 180px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .citizen-item {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 7px 10px;
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  @media (max-height: 440px) {
+    /* Optimalisasi mode Landscape HP */
+    .joystick-zone { width: 118px; height: 118px; left: 10px; bottom: 8px; }
+    .joystick-base { width: 100px; height: 100px; }
+    .joystick-knob { width: 42px; height: 42px; }
+    .side-feed { top: 58px; width: 195px; }
+    .feed-list { max-height: 68px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- HUD ATAS -->
+<div class="top-hud">
+  <div class="hud-card">
+    <div class="brand-title">
+      <div class="flag-badge"><div class="r"></div><div class="w"></div></div>
+      <span>INDONESIA MERDEKA <span style="color:#fbbf24;">HD</span></span>
+    </div>
+    <div class="player-pill" id="hudPlayerInfo">
+      <span id="hudNumber">#1</span>
+      <strong id="hudNick">Warga</strong>
+      <span class="role-badge" id="hudRole">Presiden</span>
+      <span style="color:#93c5fd;" id="hudIg">@warga</span>
+      <span class="money-badge" id="hudMoney">Rp 250.000</span>
+    </div>
+  </div>
+
+  <div class="hud-actions">
+    <button class="btn-hud gold" onclick="openKtpModal()">🪪 E-KTP & Warga</button>
+    <button class="btn-hud" onclick="toggleCameraFollow()" id="btnCam">🎯 Kamera: Kunci</button>
+    <button class="btn-hud" onclick="openSwitchAccount()">🔄 Ganti Warga</button>
+  </div>
+</div>
+
+<!-- STATUS MISI & AKTIVITAS KOTA -->
+<div class="side-feed">
+  <div class="mission-box">
+    <div class="mission-title" id="missionTitle">📦 Misi Kerja: Siap Antar</div>
+    <div class="mission-desc" id="missionDesc">Gunakan analog kiri untuk jalan ke titik jemput atau tekan tombol <b>Ambil Paket</b>.</div>
+  </div>
+  <div class="feed-list" id="feedList"></div>
+</div>
+
+<!-- ANALOG JOYSTICK ALA MOBILE LEGENDS -->
+<div class="joystick-zone" id="joystickZone">
+  <div class="joystick-base" id="joystickBase">
+    <div class="joystick-ring"></div>
+    <span class="joystick-arrow up">▲</span>
+    <span class="joystick-arrow down">▼</span>
+    <span class="joystick-arrow left">◀</span>
+    <span class="joystick-arrow right">▶</span>
+    <div class="joystick-knob" id="joystickKnob"></div>
+  </div>
+</div>
+
+<!-- KONTROL KANAN BAWAH: AKSI ANTAR BARANG & CHAT -->
+<div class="bottom-right-controls">
+  <div class="action-buttons-row">
+    <button class="btn-action-main" id="btnDeliverAction" onclick="handleDeliveryButton()">
+      📦 Ambil / Antar Barang
+    </button>
+  </div>
+  <div class="chat-bar">
+    <input type="text" id="chatInput" placeholder="Chat warga kota..." maxlength="60" onkeydown="if(event.key==='Enter') sendChat()" />
+    <button onclick="sendChat()">Kirim</button>
+  </div>
+</div>
+
+<!-- MODAL REGISTRASI & LOGIN E-KTP INDONESIA MERDEKA -->
+<div class="modal-backdrop" id="authModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>🇮🇩 E-KTP INDONESIA MERDEKA</h2>
+      <span style="font-size:11px; color:#94a3b8;">HD City Sim</span>
+    </div>
+
+    <div id="existingAccountsBox" style="margin-bottom:12px; display:none;">
+      <div style="font-size:11px; color:#fde68a; font-weight:700; margin-bottom:6px;">Warga Terdaftar (Klik untuk Masuk):</div>
+      <div id="savedAccountsList" style="display:flex; flex-direction:column; gap:5px;"></div>
+      <hr style="border:none; border-top:1px solid rgba(255,255,255,0.12); margin:12px 0;">
+    </div>
+
+    <form onsubmit="registerCitizen(event)">
+      <div class="form-group">
+        <label>Nama Lengkap (Bebas)</label>
+        <input type="text" id="regFullName" placeholder="Contoh: Yohanes Sijabat" required />
+      </div>
+      <div class="form-group">
+        <label>Nama Panggilan di Atas Kepala Avatar</label>
+        <input type="text" id="regNick" placeholder="Contoh: Yoh" maxlength="16" required />
+      </div>
+      <div class="form-group">
+        <label>Instagram ID (Wajib untuk Verifikasi Warga)</label>
+        <input type="text" id="regIg" placeholder="Contoh: @yoh7.712" required />
+      </div>
+      <div class="form-group">
+        <label>Pilih Profesi / Usaha Utama</label>
+        <select id="regJob">
+          <option value="Pengantar Paket">📦 Pengantar Paket Kilat</option>
+          <option value="Toko Baju">👕 Pengusaha Toko Baju</option>
+          <option value="Rumah Makan Aceh">🍛 Rumah Makan Aceh</option>
+          <option value="Rumah Makan Minang">🥘 Rumah Makan Minang</option>
+          <option value="Rumah Makan Batak (BPK)">🍖 Rumah Makan Batak (BPK)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Warna Seragam Avatar</label>
+        <select id="regColor">
+          <option value="#ef4444">Merah Merdeka</option>
+          <option value="#2563eb">Biru Nusantara</option>
+          <option value="#10b981">Hijau Zamrud</option>
+          <option value="#f59e0b">Emas Garuda</option>
+          <option value="#8b5cf6">Ungu Keraton</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-primary">🪪 Terbitkan E-KTP & Masuk Kota</button>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL LIHAT E-KTP & DAFTAR WARGA -->
+<div class="modal-backdrop hidden" id="ktpModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>🪪 Kartu Identitas & Warga Kota</h2>
+      <button class="btn-hud" onclick="closeKtpModal()">✕ Tutup</button>
+    </div>
+
+    <div class="ektp-card" id="ektpPreview"></div>
+
+    <div style="margin-top:14px; font-size:12px; font-weight:800; color:#fde68a;">
+      Daftar Warga Terdaftar (<span id="citizenCount">0</span>)
+    </div>
+    <div class="citizen-list" id="citizenListContainer"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// 1. KONFIGURASI DUNIA & DATA BANGUNAN KOTA INDONESIA MERDEKA HD
+// ============================================================================
+const WORLD_W = 2400;
+const WORLD_H = 1800;
+const STORAGE_KEY = 'indo_merdeka_hd_v3';
+
+const BUILDINGS = [
+  { id: 'balai', name: 'Balai Kota Merdeka', x: 1120, y: 760, w: 220, h: 150, color: '#b91c1c', roof: '#fef2f2', icon: '🏛️', desc: 'Pusat Pemerintahan' },
+  { id: 'stasiun', name: 'Stasiun Kota & Logistik', x: 420, y: 360, w: 230, h: 140, color: '#0284c7', roof: '#e0f2fe', icon: '🚉', desc: 'Gudang Paket Utama' },
+  { id: 'baju', name: 'Toko Baju Nusantara', x: 1680, y: 360, w: 200, h: 135, color: '#7c3aed', roof: '#ede9fe', icon: '👕', desc: 'Busana & Batik HD' },
+  { id: 'aceh', name: 'Rumah Makan Aceh', x: 420, y: 1220, w: 205, h: 135, color: '#059669', roof: '#d1fae5', icon: '🍛', desc: 'Mie Aceh & Kopi Gayo' },
+  { id: 'minang', name: 'Rumah Makan Minang', x: 1120, y: 1250, w: 215, h: 135, color: '#d97706', roof: '#fef3c7', icon: '🥘', desc: 'Rendang & Dendeng' },
+  { id: 'batak', name: 'Rumah Makan Batak (BPK)', x: 1680, y: 1220, w: 215, h: 135, color: '#dc2626', roof: '#fee2e2', icon: '🍖', desc: 'BPK & Saksang Khas' },
+  { id: 'monas', name: 'Tugu Monas Merdeka', x: 840, y: 410, w: 130, h: 130, color: '#f59e0b', roof: '#fef08a', icon: '🗼', desc: 'Ikon Kebanggaan Kota' },
+  { id: 'bank', name: 'Bank Rakyat Nusantara', x: 1420, y: 410, w: 170, h: 130, color: '#1d4ed8', roof: '#dbeafe', icon: '🏦', desc: 'Kas & Gaji Warga' }
+];
+
+// Jaringan Jalan Raya Aspal HD (Horizontal & Vertikal)
+const ROADS_H = [270, 650, 1080, 1520];
+const ROADS_V = [310, 760, 1230, 1610, 2040];
+const ROAD_WIDTH = 92;
+
+// ============================================================================
+// 2. STATE PENGGUNA, WARGA LAIN, MOBIL MEWAH & PENGANTARAN BARANG
+// ============================================================================
+let state = {
+  citizens: [],
+  currentId: null,
+  feeds: []
+};
+
+let currentPlayer = null;
+let otherCitizens = []; // NPC / Warga lain yang terlihat aktif & mengantar barang
+let luxuryCars = [];    // Mobil-mobil mewah berlewatan di jalan raya
+let floatingRewards = [];
+let camera = { x: 800, y: 500, follow: true, isDragging: false, dragStartX: 0, dragStartY: 0 };
+
+// State Analog Joystick ala Mobile Legends
+const joystick = {
+  active: false,
+  touchId: null,
+  dx: 0,
+  dy: 0,
+  maxRadius: 42
+};
+
+// State Misi Mengantar Barang Pemain
+let deliveryMission = {
+  hasPackage: false,
+  itemName: 'Paket Kilat',
+  itemEmoji: '📦',
+  pickupBuilding: BUILDINGS[1],
+  targetBuilding: BUILDINGS[2],
+  reward: 35000
+};
+
+// ============================================================================
+// 3. PENENTUAN PERAN OTOMATIS BERDASARKAN NOMOR ANGGOTA
+// ============================================================================
+function getRoleByNumber(num) {
+  if (num === 1) return 'Presiden';
+  if (num >= 2 && num <= 50) return 'Perdana Menteri';
+  if (num >= 51 && num <= 101) return 'Gubernur';
+  return 'Masyarakat';
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.citizens)) {
+        state = parsed;
+      }
+    }
+  } catch (e) {}
+
+  // Seed warga contoh jika kosong agar kota terasa hidup
+  if (state.citizens.length === 0) {
+    state.citizens = [
+      {
+        id: 'seed-1',
+        number: 1,
+        fullName: 'Yohanes Sijabat',
+        nick: 'Yoh',
+        ig: '@yoh7.712',
+        job: 'Pengantar Paket',
+        color: '#ef4444',
+        money: 500000,
+        deliveries: 12,
+        x: 1180,
+        y: 930
+      }
+    ];
+    state.currentId = 'seed-1';
+    saveState();
+  }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {}
+}
+
+function addFeed(text) {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  state.feeds.unshift(`[${hh}:${mm}] ${text}`);
+  if (state.feeds.length > 15) state.feeds.pop();
+  renderFeed();
+}
+
+function renderFeed() {
+  const el = document.getElementById('feedList');
+  if (!el) return;
+  el.innerHTML = state.feeds.slice(0, 5).map(item => `<div class="feed-item">${item}</div>`).join('');
+}
+
+// ============================================================================
+// 4. REGISTRASI & LOGIN E-KTP
+// ============================================================================
+function initAuthUI() {
+  const modal = document.getElementById('authModal');
+  const listBox = document.getElementById('existingAccountsBox');
+  const listEl = document.getElementById('savedAccountsList');
+
+  if (state.citizens.length > 0) {
+    listBox.style.display = 'block';
+    listEl.innerHTML = state.citizens.map(c => `
+      <button type="button" class="btn-hud" style="width:100%; justify-content:space-between; padding:8px 10px;" onclick="loginAs('${c.id}')">
+        <span><b>#${c.number} ${c.nick}</b> (${c.ig})</span>
+        <span class="role-badge">${getRoleByNumber(c.number)}</span>
+      </button>
+    `).join('');
+  }
+
+  if (state.currentId) {
+    const found = state.citizens.find(c => c.id === state.currentId);
+    if (found) {
+      loginAs(found.id);
+      return;
+    }
+  }
+  modal.classList.remove('hidden');
+}
+
+function loginAs(id) {
+  const found = state.citizens.find(c => c.id === id);
+  if (!found) return;
+  state.currentId = found.id;
+  saveState();
+
+  currentPlayer = {
+    ...found,
+    role: getRoleByNumber(found.number),
+    vx: 0,
+    vy: 0,
+    facing: 1,
+    walkPhase: 0,
+    isMoving: false,
+    chatText: '',
+    chatTimer: 0
+  };
+
+  camera.x = currentPlayer.x - window.innerWidth / 2;
+  camera.y = currentPlayer.y - window.innerHeight / 2;
+  camera.follow = true;
+  document.getElementById('btnCam').textContent = '🎯 Kamera: Kunci';
+
+  updateHud();
+  setupNewDeliveryMission(false);
+  spawnOtherCitizens();
+  document.getElementById('authModal').classList.add('hidden');
+  addFeed(`${currentPlayer.nick} (${currentPlayer.role}) memasuki kota!`);
+}
+
+function registerCitizen(e) {
+  e.preventDefault();
+  const fullName = document.getElementById('regFullName').value.trim();
+  const nick = document.getElementById('regNick').value.trim();
+  let ig = document.getElementById('regIg').value.trim();
+  const job = document.getElementById('regJob').value;
+  const color = document.getElementById('regColor').value;
+
+  if (!ig.startsWith('@')) ig = '@' + ig;
+  const nextNumber = state.citizens.length + 1;
+
+  const newCitizen = {
+    id: 'warga-' + Date.now(),
+    number: nextNumber,
+    fullName,
+    nick,
+    ig,
+    job,
+    color,
+    money: 250000,
+    deliveries: 0,
+    x: 1180 + (Math.random() * 80 - 40),
+    y: 940 + (Math.random() * 60 - 30)
+  };
+
+  state.citizens.push(newCitizen);
+  saveState();
+  loginAs(newCitizen.id);
+}
+
+function openSwitchAccount() {
+  initAuthUI();
+  document.getElementById('authModal').classList.remove('hidden');
+}
+
+function updateHud() {
+  if (!currentPlayer) return;
+  document.getElementById('hudNumber').textContent = `#${currentPlayer.number}`;
+  document.getElementById('hudNick').textContent = currentPlayer.nick;
+  document.getElementById('hudRole').textContent = currentPlayer.role;
+  document.getElementById('hudIg').textContent = currentPlayer.ig;
+  document.getElementById('hudMoney').textContent = 'Rp ' + currentPlayer.money.toLocaleString('id-ID');
+}
+
+// ============================================================================
+// 5. E-KTP MODAL & DAFTAR WARGA
+// ============================================================================
+function openKtpModal() {
+  if (!currentPlayer) return;
+  const preview = document.getElementById('ektpPreview');
+  preview.innerHTML = `
+    <div class="ektp-header">
+      <div class="rep">REPUBLIK INDONESIA MERDEKA</div>
+      <div class="title">E-KTP WARGA KOTA HD</div>
+    </div>
+    <div class="ektp-body">
+      <div>
+        <div class="ektp-row"><span>No. Anggota</span>: <b>#${currentPlayer.number}</b></div>
+        <div class="ektp-row"><span>Nama</span>: <b>${currentPlayer.fullName}</b></div>
+        <div class="ektp-row"><span>Panggilan</span>: <b>${currentPlayer.nick}</b></div>
+        <div class="ektp-row"><span>Jabatan</span>: <b>${currentPlayer.role}</b></div>
+        <div class="ektp-row"><span>Instagram</span>: <b>${currentPlayer.ig}</b></div>
+        <div class="ektp-row"><span>Profesi</span>: <b>${currentPlayer.job}</b></div>
+        <div class="ektp-row"><span>Antaran</span>: <b>${currentPlayer.deliveries || 0} Paket</b></div>
+      </div>
+      <div class="ektp-photo" style="background:${currentPlayer.color};">
+        <span>${currentPlayer.nick.charAt(0).toUpperCase()}</span>
+        <span style="font-size:9px; margin-top:4px;">HD ID</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('citizenCount').textContent = state.citizens.length;
+  const container = document.getElementById('citizenListContainer');
+  container.innerHTML = state.citizens.map(c => `
+    <div class="citizen-item">
+      <div>
+        <b>#${c.number} ${c.nick}</b> <span style="color:#93c5fd;">(${c.ig})</span>
+        <div style="color:#94a3b8; font-size:10px;">${c.job} • Rp ${(c.money || 0).toLocaleString('id-ID')}</div>
+      </div>
+      <span class="role-badge">${getRoleByNumber(c.number)}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('ktpModal').classList.remove('hidden');
+}
+
+function closeKtpModal() {
+  document.getElementById('ktpModal').classList.add('hidden');
+}
+
+// ============================================================================
+// 6. SISTEM MISI ANTAR BARANG (TERLIHAT DI TANGAN AVATAR!)
+// ============================================================================
+const CARGO_ITEMS = [
+  { name: 'Paket Logistik Kilat', emoji: '📦', color: '#d97706' },
+  { name: 'Pesanan Baju Batik', emoji: '🛍️', color: '#8b5cf6' },
+  { name: 'Nasi Rendang Minang', emoji: '🍱', color: '#ef4444' },
+  { name: 'Mie Aceh Spesial', emoji: '🍜', color: '#10b981' },
+  { name: 'BPK Sambal Andaliman', emoji: '🥡', color: '#dc2626' }
+];
+
+function setupNewDeliveryMission(autoPickup = false) {
+  const b1 = BUILDINGS[Math.floor(Math.random() * BUILDINGS.length)];
+  let b2 = BUILDINGS[Math.floor(Math.random() * BUILDINGS.length)];
+  while (b2.id === b1.id) {
+    b2 = BUILDINGS[Math.floor(Math.random() * BUILDINGS.length)];
+  }
+  const cargo = CARGO_ITEMS[Math.floor(Math.random() * CARGO_ITEMS.length)];
+
+  deliveryMission = {
+    hasPackage: autoPickup,
+    itemName: cargo.name,
+    itemEmoji: cargo.emoji,
+    itemColor: cargo.color,
+    pickupBuilding: b1,
+    targetBuilding: b2,
+    reward: 35000 + Math.floor(Math.random() * 25000)
+  };
+  updateMissionUI();
+}
+
+function updateMissionUI() {
+  const titleEl = document.getElementById('missionTitle');
+  const descEl = document.getElementById('missionDesc');
+  const btnEl = document.getElementById('btnDeliverAction');
+
+  if (!deliveryMission.hasPackage) {
+    titleEl.textContent = `📍 Jemput: ${deliveryMission.pickupBuilding.name}`;
+    descEl.innerHTML = `Jalan ke <b>${deliveryMission.pickupBuilding.icon} ${deliveryMission.pickupBuilding.name}</b> atau klik tombol untuk membawa <b>${deliveryMission.itemEmoji} ${deliveryMission.itemName}</b>.`;
+    btnEl.classList.remove('delivering');
+    btnEl.innerHTML = `📦 Ambil ${deliveryMission.itemName.split(' ')[0]}`;
+  } else {
+    titleEl.textContent = `🚚 Mengantar: ${deliveryMission.itemEmoji} ${deliveryMission.itemName}`;
+    descEl.innerHTML = `Avatar sedang membawa barang! Antar ke <b>${deliveryMission.targetBuilding.icon} ${deliveryMission.targetBuilding.name}</b> (+Rp ${deliveryMission.reward.toLocaleString('id-ID')}).`;
+    btnEl.classList.add('delivering');
+    btnEl.innerHTML = `✅ Serahkan di ${deliveryMission.targetBuilding.name.split(' ')[0]}`;
+  }
+}
+
+function handleDeliveryButton() {
+  if (!currentPlayer) return;
+  const activeTarget = deliveryMission.hasPackage ? deliveryMission.targetBuilding : deliveryMission.pickupBuilding;
+  const tx = activeTarget.x + activeTarget.w / 2;
+  const ty = activeTarget.y + activeTarget.h + 26;
+  const dist = Math.hypot(currentPlayer.x - tx, currentPlayer.y - ty);
+
+  if (dist > 145) {
+    // Jika masih jauh, arahkan notifikasi & beri panduan panah di peta
+    currentPlayer.chatText = `Menuju ${activeTarget.name}!`;
+    currentPlayer.chatTimer = 140;
+    addFeed(`${currentPlayer.nick} bergerak menuju ${activeTarget.name}`);
+    return;
+  }
+
+  if (!deliveryMission.hasPackage) {
+    deliveryMission.hasPackage = true;
+    currentPlayer.chatText = `Membawa ${deliveryMission.itemEmoji} ${deliveryMission.itemName}!`;
+    currentPlayer.chatTimer = 180;
+    addFeed(`${currentPlayer.nick} mengambil ${deliveryMission.itemName} di ${deliveryMission.pickupBuilding.name}`);
+    updateMissionUI();
+  } else {
+    // Selesai mengantar barang!
+    currentPlayer.money += deliveryMission.reward;
+    currentPlayer.deliveries = (currentPlayer.deliveries || 0) + 1;
+
+    const idx = state.citizens.findIndex(c => c.id === currentPlayer.id);
+    if (idx !== -1) {
+      state.citizens[idx].money = currentPlayer.money;
+      state.citizens[idx].deliveries = currentPlayer.deliveries;
+      saveState();
+    }
+
+    floatingRewards.push({
+      x: currentPlayer.x,
+      y: currentPlayer.y - 55,
+      text: `+Rp ${deliveryMission.reward.toLocaleString('id-ID')}`,
+      alpha: 1.0
+    });
+
+    currentPlayer.chatText = `Paket terkirim! +Rp ${deliveryMission.reward.toLocaleString('id-ID')}`;
+    currentPlayer.chatTimer = 180;
+    addFeed(`${currentPlayer.nick} sukses mengantar ${deliveryMission.itemName} ke ${deliveryMission.targetBuilding.name}!`);
+    updateHud();
+    setupNewDeliveryMission(false);
+  }
+}
+
+// ============================================================================
+// 7. WARGA LAIN YANG AKTIF BERJALAN & MENGANTAR BARANG DI PETA
+// ============================================================================
+function spawnOtherCitizens() {
+  otherCitizens = [];
+  const sampleBots = [
+    { number: 2, nick: 'Rani', ig: '@rani.id', job: 'Toko Baju', color: '#2563eb' },
+    { number: 3, nick: 'Budi', ig: '@budi_ktp', job: 'Rumah Makan Minang', color: '#10b981' },
+    { number: 4, nick: 'Sari', ig: '@sari.merdeka', job: 'Rumah Makan Aceh', color: '#f59e0b' },
+    { number: 5, nick: 'Togar', ig: '@togar.bpk', job: 'Rumah Makan Batak (BPK)', color: '#8b5cf6' }
+  ];
+
+  // Gabungkan warga tersimpan selain currentPlayer + bot warga aktif
+  state.citizens.forEach(c => {
+    if (currentPlayer && c.id === currentPlayer.id) return;
+    sampleBots.unshift({
+      number: c.number,
+      nick: c.nick,
+      ig: c.ig,
+      job: c.job,
+      color: c.color
+    });
+  });
+
+  sampleBots.slice(0, 6).forEach((b, idx) => {
+    const startB = BUILDINGS[idx % BUILDINGS.length];
+    const destB = BUILDINGS[(idx + 2) % BUILDINGS.length];
+    const cargo = CARGO_ITEMS[idx % CARGO_ITEMS.length];
+    otherCitizens.push({
+      ...b,
+      role: getRoleByNumber(b.number),
+      x: startB.x + startB.w / 2,
+      y: startB.y + startB.h + 24,
+      targetB: destB,
+      hasPackage: true,
+      itemEmoji: cargo.emoji,
+      itemName: cargo.name,
+      walkPhase: Math.random() * 6,
+      facing: 1,
+      isMoving: true,
+      chatText: `Antar ${cargo.emoji}`,
+      chatTimer: 160
+    });
+  });
+}
+
+function updateOtherCitizens() {
+  otherCitizens.forEach(npc => {
+    const tx = npc.targetB.x + npc.targetB.w / 2;
+    const ty = npc.targetB.y + npc.targetB.h + 24;
+    const dx = tx - npc.x;
+    const dy = ty - npc.y;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist < 16) {
+      // Pilih tujuan baru & ganti status bawa paket
+      npc.hasPackage = !npc.hasPackage;
+      const nextB = BUILDINGS[Math.floor(Math.random() * BUILDINGS.length)];
+      npc.targetB = nextB;
+      if (npc.hasPackage) {
+        const cargo = CARGO_ITEMS[Math.floor(Math.random() * CARGO_ITEMS.length)];
+        npc.itemEmoji = cargo.emoji;
+        npc.chatText = `Kirim ${cargo.emoji} ke ${nextB.name.split(' ')[0]}`;
+        npc.chatTimer = 160;
+      }
+    } else {
+      const speed = 1.65;
+      npc.x += (dx / dist) * speed;
+      npc.y += (dy / dist) * speed;
+      npc.facing = dx >= 0 ? 1 : -1;
+      npc.walkPhase += 0.16;
+    }
+
+    if (npc.chatTimer > 0) npc.chatTimer--;
+  });
+}
+
+// ============================================================================
+// 8. MOBIL-MOBIL MEWAH HD BERLEWATAN DI JALAN RAYA
+// ============================================================================
+const LUXURY_CAR_MODELS = [
+  { model: 'Lamborghini Aventador', body: '#eab308', accent: '#1e293b', roof: '#0f172a', speed: 4.4, type: 'supercar' },
+  { model: 'Ferrari SF90 Stradale', body: '#dc2626', accent: '#fef2f2', roof: '#111827', speed: 4.6, type: 'supercar' },
+  { model: 'Rolls-Royce Phantom', body: '#0f172a', accent: '#e2e8f0', roof: '#cbd5e1', speed: 2.9, type: 'limo' },
+  { model: 'Mercedes-Maybach S680', body: '#f8fafc', accent: '#1e293b', roof: '#334155', speed: 3.2, type: 'limo' },
+  { model: 'Porsche 911 GT3 RS', body: '#0284c7', accent: '#38bdf8', roof: '#0f172a', speed: 4.1, type: 'supercar' },
+  { model: 'Bugatti Chiron', body: '#1d4ed8', accent: '#60a5fa', roof: '#090d16', speed: 4.9, type: 'supercar' }
+];
+
+function initLuxuryCars() {
+  luxuryCars = [];
+  // Mobil jalur horizontal
+  ROADS_H.forEach((ry, i) => {
+    const spec1 = LUXURY_CAR_MODELS[i % LUXURY_CAR_MODELS.length];
+    luxuryCars.push({
+      ...spec1,
+      axis: 'H',
+      dir: 1,
+      x: Math.random() * WORLD_W,
+      y: ry - 18
+    });
+    const spec2 = LUXURY_CAR_MODELS[(i + 2) % LUXURY_CAR_MODELS.length];
+    luxuryCars.push({
+      ...spec2,
+      axis: 'H',
+      dir: -1,
+      x: Math.random() * WORLD_W,
+      y: ry + 18
+    });
+  });
+
+  // Mobil jalur vertikal
+  ROADS_V.forEach((rx, i) => {
+    const spec = LUXURY_CAR_MODELS[(i + 1) % LUXURY_CAR_MODELS.length];
+    luxuryCars.push({
+      ...spec,
+      axis: 'V',
+      dir: i % 2 === 0 ? 1 : -1,
+      x: rx + (i % 2 === 0 ? 18 : -18),
+      y: Math.random() * WORLD_H
+    });
+  });
+}
+
+function updateLuxuryCars() {
+  luxuryCars.forEach(car => {
+    if (car.axis === 'H') {
+      car.x += car.speed * car.dir;
+      if (car.dir === 1 && car.x > WORLD_W + 140) car.x = -140;
+      if (car.dir === -1 && car.x < -140) car.x = WORLD_W + 140;
+    } else {
+      car.y += car.speed * car.dir;
+      if (car.dir === 1 && car.y > WORLD_H + 140) car.y = -140;
+      if (car.dir === -1 && car.y < -140) car.y = WORLD_H + 140;
+    }
+  });
+}
+
+// ============================================================================
+// 9. KONTROL ANALOG JOYSTICK ML + KEYBOARD WASD/ARROW + GESER PETA
+// ============================================================================
+const joyZone = document.getElementById('joystickZone');
+const joyBase = document.getElementById('joystickBase');
+const joyKnob = document.getElementById('joystickKnob');
+
+function updateJoystickFromPoint(clientX, clientY) {
+  const rect = joyBase.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  let dx = clientX - centerX;
+  let dy = clientY - centerY;
+  const dist = Math.hypot(dx, dy);
+
+  if (dist > joystick.maxRadius) {
+    dx = (dx / dist) * joystick.maxRadius;
+    dy = (dy / dist) * joystick.maxRadius;
+  }
+
+  joyKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+  joystick.dx = dx / joystick.maxRadius;
+  joystick.dy = dy / joystick.maxRadius;
+}
+
+function resetJoystick() {
+  joystick.active = false;
+  joystick.touchId = null;
+  joystick.dx = 0;
+  joystick.dy = 0;
+  joyKnob.style.transform = 'translate(0px, 0px)';
+}
+
+joyZone.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  const t = e.changedTouches[0];
+  joystick.active = true;
+  joystick.touchId = t.identifier;
+  updateJoystickFromPoint(t.clientX, t.clientY);
+}, { passive: false });
+
+joyZone.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  for (let i = 0; i < e.changedTouches.length; i++) {
+    const t = e.changedTouches[i];
+    if (t.identifier === joystick.touchId) {
+      updateJoystickFromPoint(t.clientX, t.clientY);
+      break;
+    }
+  }
+}, { passive: false });
+
+joyZone.addEventListener('touchend', (e) => {
+  for (let i = 0; i < e.changedTouches.length; i++) {
+    if (e.changedTouches[i].identifier === joystick.touchId) {
+      resetJoystick();
+      break;
+    }
+  }
+});
+
+// Dukungan mouse drag pada joystick untuk PC/Laptop
+joyZone.addEventListener('mousedown', (e) => {
+  joystick.active = true;
+  updateJoystickFromPoint(e.clientX, e.clientY);
+});
+window.addEventListener('mousemove', (e) => {
+  if (joystick.active && joystick.touchId === null) {
+    updateJoystickFromPoint(e.clientX, e.clientY);
+  }
+});
+window.addEventListener('mouseup', () => {
+  if (joystick.active && joystick.touchId === null) {
+    resetJoystick();
+  }
+});
+
+// Dukungan keyboard WASD / Arrow
+const keysPressed = {};
+window.addEventListener('keydown', (e) => { keysPressed[e.key.toLowerCase()] = true; });
+window.addEventListener('keyup', (e) => { keysPressed[e.key.toLowerCase()] = false; });
+
+function toggleCameraFollow() {
+  camera.follow = !camera.follow;
+  document.getElementById('btnCam').textContent = camera.follow ? '🎯 Kamera: Kunci' : '🖐️ Kamera: Bebas';
+}
+
+function sendChat() {
+  if (!currentPlayer) return;
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  currentPlayer.chatText = msg;
+  currentPlayer.chatTimer = 220;
+  addFeed(`💬 ${currentPlayer.nick}: ${msg}`);
+  input.value = '';
+}
+
+// ============================================================================
+// 10. ENGINE RENDER HD (CANVAS 2D HIGH-DPI)
+// ============================================================================
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+function resizeCanvas() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = window.innerWidth * dpr;
+  canvas.height = window.innerHeight * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Panning peta mulus saat disentuh di luar joystick
+canvas.addEventListener('pointerdown', (e) => {
+  camera.isDragging = true;
+  camera.dragStartX = e.clientX + camera.x;
+  camera.dragStartY = e.clientY + camera.y;
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!camera.isDragging) return;
+  camera.follow = false;
+  document.getElementById('btnCam').textContent = '🖐️ Kamera: Bebas';
+  camera.x = Math.max(0, Math.min(WORLD_W - window.innerWidth, camera.dragStartX - e.clientX));
+  camera.y = Math.max(0, Math.min(WORLD_H - window.innerHeight, camera.dragStartY - e.clientY));
+});
+canvas.addEventListener('pointerup', () => { camera.isDragging = false; });
+
+function drawRoundedRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function drawWorldHD() {
+  // Latar Rumput Taman Kota HD dengan gradien & tekstur halus
+  const grassGrad = ctx.createLinearGradient(0, 0, WORLD_W, WORLD_H);
+  grassGrad.addColorStop(0, '#14532d');
+  grassGrad.addColorStop(0.5, '#166534');
+  grassGrad.addColorStop(1, '#15803d');
+  ctx.fillStyle = grassGrad;
+  ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+
+  // Grid blok rumput realistis
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+  ctx.lineWidth = 1;
+  for (let gx = 0; gx < WORLD_W; gx += 120) {
+    ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, WORLD_H); ctx.stroke();
+  }
+  for (let gy = 0; gy < WORLD_H; gy += 120) {
+    ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(WORLD_W, gy); ctx.stroke();
+  }
+
+  // Trotoar & Jalan Raya Aspal HD
+  ROADS_H.forEach(ry => {
+    // Trotoar
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(0, ry - ROAD_WIDTH / 2 - 8, WORLD_W, ROAD_WIDTH + 16);
+    // Aspal
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(0, ry - ROAD_WIDTH / 2, WORLD_W, ROAD_WIDTH);
+    // Marka garis putih putus-putus
+    ctx.strokeStyle = '#f8fafc';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([28, 22]);
+    ctx.beginPath(); ctx.moveTo(0, ry); ctx.lineTo(WORLD_W, ry); ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  ROADS_V.forEach(rx => {
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(rx - ROAD_WIDTH / 2 - 8, 0, ROAD_WIDTH + 16, WORLD_H);
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(rx - ROAD_WIDTH / 2, 0, ROAD_WIDTH, WORLD_H);
+    ctx.strokeStyle = '#f8fafc';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([28, 22]);
+    ctx.beginPath(); ctx.moveTo(rx, 0); ctx.lineTo(rx, WORLD_H); ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  // Persimpangan Aspal Bersih & Zebra Cross
+  ROADS_H.forEach(ry => {
+    ROADS_V.forEach(rx => {
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(rx - ROAD_WIDTH / 2, ry - ROAD_WIDTH / 2, ROAD_WIDTH, ROAD_WIDTH);
+    });
+  });
+
+  // Pohon-pohon rindang di pinggir jalan
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  for (let tx = 160; tx < WORLD_W - 100; tx += 280) {
+    for (let ty = 160; ty < WORLD_H - 100; ty += 380) {
+      ctx.beginPath(); ctx.arc(tx + 6, ty + 8, 22, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath(); ctx.arc(tx, ty, 22, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#4ade80';
+      ctx.beginPath(); ctx.arc(tx - 6, ty - 6, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    }
+  }
+}
+
+function drawBuildingsHD() {
+  const activeGoal = deliveryMission.hasPackage ? deliveryMission.targetBuilding : deliveryMission.pickupBuilding;
+
+  BUILDINGS.forEach(b => {
+    // Bayangan gedung 3D HD
+    ctx.fillStyle = 'rgba(2, 6, 23, 0.42)';
+    drawRoundedRect(b.x + 10, b.y + 14, b.w, b.h, 16);
+    ctx.fill();
+
+    // Dinding utama gedung
+    ctx.fillStyle = b.color;
+    drawRoundedRect(b.x, b.y, b.w, b.h, 16);
+    ctx.fill();
+
+    // Atap gedung HD
+    ctx.fillStyle = b.roof;
+    drawRoundedRect(b.x + 10, b.y + 10, b.w - 20, b.h - 36, 12);
+    ctx.fill();
+
+    // Garis tepi emas jika gedung ini tujuan misi aktif
+    if (activeGoal && activeGoal.id === b.id) {
+      const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 220);
+      ctx.strokeStyle = `rgba(251, 191, 36, ${0.5 + pulse * 0.5})`;
+      ctx.lineWidth = 4;
+      drawRoundedRect(b.x - 4, b.y - 4, b.w + 8, b.h + 8, 18);
+      ctx.stroke();
+
+      // Lingkaran zona interaksi di depan pintu gedung
+      const zx = b.x + b.w / 2;
+      const zy = b.y + b.h + 26;
+      ctx.fillStyle = deliveryMission.hasPackage ? 'rgba(16, 185, 129, 0.28)' : 'rgba(251, 191, 36, 0.28)';
+      ctx.beginPath(); ctx.arc(zx, zy, 34 + pulse * 6, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = deliveryMission.hasPackage ? '#34d399' : '#fbbf24';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Ikon & Nama Gedung HD
+    ctx.font = '28px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(b.icon, b.x + b.w / 2, b.y + 52);
+
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText(b.name, b.x + b.w / 2, b.y + 76);
+
+    ctx.fillStyle = '#475569';
+    ctx.font = '10px sans-serif';
+    ctx.fillText(b.desc, b.x + b.w / 2, b.y + 92);
+  });
+}
+
+function drawLuxuryCarsHD() {
+  luxuryCars.forEach(car => {
+    ctx.save();
+    ctx.translate(car.x, car.y);
+    if (car.axis === 'H') {
+      if (car.dir === -1) ctx.scale(-1, 1);
+    } else {
+      ctx.rotate(car.dir === 1 ? Math.PI / 2 : -Math.PI / 2);
+    }
+
+    const w = car.type === 'limo' ? 78 : 66;
+    const h = 30;
+
+    // Bayangan mobil
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    drawRoundedRect(-w / 2 + 3, -h / 2 + 5, w, h, 9);
+    ctx.fill();
+
+    // Bodi mobil mewah metalik
+    ctx.fillStyle = car.body;
+    drawRoundedRect(-w / 2, -h / 2, w, h, 8);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Kaca kabin & atap panoramik
+    ctx.fillStyle = car.roof;
+    drawRoundedRect(-w * 0.24, -h * 0.34, w * 0.48, h * 0.68, 5);
+    ctx.fill();
+
+    // Strip aerodinamis / kap mesin
+    ctx.fillStyle = car.accent;
+    ctx.fillRect(w * 0.18, -h * 0.14, w * 0.22, h * 0.28);
+
+    // Lampu depan LED Xenon bersinar
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath(); ctx.arc(w / 2 - 2, -h * 0.3, 3.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(w / 2 - 2, h * 0.3, 3.2, 0, Math.PI * 2); ctx.fill();
+
+    // Sorot lampu depan HD
+    const beamGrad = ctx.createLinearGradient(w / 2, 0, w / 2 + 48, 0);
+    beamGrad.addColorStop(0, 'rgba(254, 240, 138, 0.38)');
+    beamGrad.addColorStop(1, 'rgba(254, 240, 138, 0)');
+    ctx.fillStyle = beamGrad;
+    ctx.beginPath();
+    ctx.moveTo(w / 2, -h * 0.34);
+    ctx.lineTo(w / 2 + 48, -h * 0.75);
+    ctx.lineTo(w / 2 + 48, h * 0.75);
+    ctx.lineTo(w / 2, h * 0.34);
+    ctx.closePath();
+    ctx.fill();
+
+    // Lampu rem belakang merah LED
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(-w / 2, -h * 0.35, 3, 6);
+    ctx.fillRect(-w / 2, h * 0.35 - 6, 3, 6);
+
+    ctx.restore();
+  });
+}
+
+function drawAvatarHD(entity, isMainPlayer) {
+  const x = entity.x;
+  const y = entity.y;
+  const swing = entity.isMoving ? Math.sin(entity.walkPhase) * 6 : 0;
+  const bob = entity.isMoving ? Math.abs(Math.sin(entity.walkPhase)) * 3 : 0;
+
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Bayangan kaki di tanah
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+  ctx.beginPath();
+  ctx.ellipse(0, 18, 15, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Ring penanda pemain utama
+  if (isMainPlayer) {
+    ctx.strokeStyle = 'rgba(251, 191, 36, 0.85)';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.ellipse(0, 18, 20, 10, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // Kaki kiri & kanan berayun alami saat berjalan
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-5, 6 - bob);
+  ctx.lineTo(-5 + swing, 17);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(5, 6 - bob);
+  ctx.lineTo(5 - swing, 17);
+  ctx.stroke();
+
+  // Badan / Seragam Avatar HD
+  ctx.fillStyle = entity.color || '#ef4444';
+  drawRoundedRect(-11, -12 - bob, 22, 20, 7);
+  ctx.fill();
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Tangan & Animasi Mengantar Barang di Tangan Avatar!
+  const carrying = isMainPlayer ? deliveryMission.hasPackage : entity.hasPackage;
+  const cargoEmoji = isMainPlayer ? deliveryMission.itemEmoji : entity.itemEmoji;
+
+  if (carrying) {
+    // Kedua lengan memegang kotak paket di depan dada
+    ctx.strokeStyle = '#fed7aa';
+    ctx.lineWidth = 4.5;
+    ctx.beginPath();
+    ctx.moveTo(-10, -6 - bob);
+    ctx.lineTo(entity.facing * 12, -2 - bob);
+    ctx.moveTo(10, -6 - bob);
+    ctx.lineTo(entity.facing * 12, -2 - bob);
+    ctx.stroke();
+
+    // Kotak Paket 3D HD di tangan avatar
+    const boxX = entity.facing * 14 - 9;
+    const boxY = -11 - bob;
+    ctx.fillStyle = '#f59e0b';
+    drawRoundedRect(boxX, boxY, 18, 15, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#fef3c7';
+    ctx.lineWidth = 1.3;
+    ctx.stroke();
+
+    // Pita segel paket
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(boxX + 7, boxY, 4, 15);
+
+    // Ikon barang melayang kecil di atas paket
+    ctx.font = '13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(cargoEmoji || '📦', entity.facing * 14, -15 - bob);
+  } else {
+    // Tangan berayun santai saat tidak membawa barang
+    ctx.strokeStyle = '#fed7aa';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(-11, -7 - bob);
+    ctx.lineTo(-14 - swing * 0.6, 4 - bob);
+    ctx.moveTo(11, -7 - bob);
+    ctx.lineTo(14 + swing * 0.6, 4 - bob);
+    ctx.stroke();
+  }
+
+  // Kepala Avatar HD
+  ctx.fillStyle = '#fed7aa';
+  ctx.beginPath();
+  ctx.arc(0, -22 - bob, 11, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#7c2d12';
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  // Rambut rapi
+  ctx.fillStyle = '#1e293b';
+  ctx.beginPath();
+  ctx.arc(0, -24 - bob, 11, Math.PI, Math.PI * 2);
+  ctx.fill();
+
+  // Mata menghadap arah jalan
+  ctx.fillStyle = '#0f172a';
+  ctx.beginPath();
+  ctx.arc(entity.facing * 4, -22 - bob, 1.8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Label Nama & Peran di Atas Kepala
+  const tagText = `#${entity.number} ${entity.nick}`;
+  ctx.font = 'bold 11px sans-serif';
+  const textW = ctx.measureText(tagText).width + 14;
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+  drawRoundedRect(-textW / 2, -52 - bob, textW, 17, 8);
+  ctx.fill();
+
+  ctx.fillStyle = isMainPlayer ? '#fde047' : '#f8fafc';
+  ctx.textAlign = 'center';
+  ctx.fillText(tagText, 0, -40 - bob);
+
+  // Balon Chat jika sedang berbicara / mengantar
+  if (entity.chatTimer > 0 && entity.chatText) {
+    ctx.font = '10.5px sans-serif';
+    const cw = ctx.measureText(entity.chatText).width + 16;
+    ctx.fillStyle = '#ffffff';
+    drawRoundedRect(-cw / 2, -74 - bob, cw, 19, 9);
+    ctx.fill();
+    ctx.fillStyle = '#0f172a';
+    ctx.fillText(entity.chatText, 0, -61 - bob);
+  }
+
+  ctx.restore();
+}
+
+function drawGuidanceArrow() {
+  if (!currentPlayer) return;
+  const goal = deliveryMission.hasPackage ? deliveryMission.targetBuilding : deliveryMission.pickupBuilding;
+  const gx = goal.x + goal.w / 2;
+  const gy = goal.y + goal.h + 26;
+  const dx = gx - currentPlayer.x;
+  const dy = gy - currentPlayer.y;
+  const dist = Math.hypot(dx, dy);
+
+  if (dist > 65) {
+    const angle = Math.atan2(dy, dx);
+    const px = currentPlayer.x + Math.cos(angle) * 44;
+    const py = currentPlayer.y + Math.sin(angle) * 44;
+
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(angle);
+    ctx.fillStyle = deliveryMission.hasPackage ? '#10b981' : '#fbbf24';
+    ctx.beginPath();
+    ctx.moveTo(12, 0);
+    ctx.lineTo(-6, -7);
+    ctx.lineTo(-3, 0);
+    ctx.lineTo(-6, 7);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// ============================================================================
+// 11. GAME LOOP UTAMA
+// ============================================================================
+function updatePlayerMovement() {
+  if (!currentPlayer) return;
+
+  let moveX = joystick.dx;
+  let moveY = joystick.dy;
+
+  if (keysPressed['w'] || keysPressed['arrowup']) moveY -= 1;
+  if (keysPressed['s'] || keysPressed['arrowdown']) moveY += 1;
+  if (keysPressed['a'] || keysPressed['arrowleft']) moveX -= 1;
+  if (keysPressed['d'] || keysPressed['arrowright']) moveX += 1;
+
+  const mag = Math.hypot(moveX, moveY);
+  if (mag > 0.08) {
+    if (mag > 1) {
+      moveX /= mag;
+      moveY /= mag;
+    }
+    const speed = 3.6;
+    currentPlayer.x = Math.max(40, Math.min(WORLD_W - 40, currentPlayer.x + moveX * speed));
+    currentPlayer.y = Math.max(50, Math.min(WORLD_H - 40, currentPlayer.y + moveY * speed));
+    if (Math.abs(moveX) > 0.1) currentPlayer.facing = moveX >= 0 ? 1 : -1;
+    currentPlayer.isMoving = true;
+    currentPlayer.walkPhase += 0.22;
+  } else {
+    currentPlayer.isMoving = false;
+  }
+
+  if (currentPlayer.chatTimer > 0) currentPlayer.chatTimer--;
+
+  // Auto-ambil / auto-antar saat avatar menyentuh titik lingkaran depan gedung!
+  const activeGoal = deliveryMission.hasPackage ? deliveryMission.targetBuilding : deliveryMission.pickupBuilding;
+  const gx = activeGoal.x + activeGoal.w / 2;
+  const gy = activeGoal.y + activeGoal.h + 26;
+  if (Math.hypot(currentPlayer.x - gx, currentPlayer.y - gy) < 38) {
+    handleDeliveryButton();
+  }
+
+  // Kamera halus mengikuti avatar
+  if (camera.follow && !camera.isDragging) {
+    const targetCamX = Math.max(0, Math.min(WORLD_W - window.innerWidth, currentPlayer.x - window.innerWidth / 2));
+    const targetCamY = Math.max(0, Math.min(WORLD_H - window.innerHeight, currentPlayer.y - window.innerHeight / 2));
+    camera.x += (targetCamX - camera.x) * 0.14;
+    camera.y += (targetCamY - camera.y) * 0.14;
+  }
+}
+
+function gameLoop() {
+  updatePlayerMovement();
+  updateOtherCitizens();
+  updateLuxuryCars();
+
+  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+  ctx.save();
+  ctx.translate(-camera.x, -camera.y);
+
+  drawWorldHD();
+  drawBuildingsHD();
+  drawLuxuryCarsHD();
+
+  // Gambar warga lain yang sedang mengantar barang
+  otherCitizens.forEach(npc => drawAvatarHD(npc, false));
+
+  // Gambar avatar pemain utama & panah penunjuk arah tujuan
+  if (currentPlayer) {
+    drawGuidanceArrow();
+    drawAvatarHD(currentPlayer, true);
+  }
+
+  // Efek teks hadiah melayang (+Rp)
+  for (let i = floatingRewards.length - 1; i >= 0; i--) {
+    const fr = floatingRewards[i];
+    fr.y -= 0.8;
+    fr.alpha -= 0.015;
+    if (fr.alpha <= 0) {
+      floatingRewards.splice(i, 1);
+      continue;
+    }
+    ctx.fillStyle = `rgba(52, 211, 153, ${fr.alpha})`;
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(fr.text, fr.x, fr.y);
+  }
+
+  ctx.restore();
+  requestAnimationFrame(gameLoop);
+}
+
+// ============================================================================
+// 12. INISIALISASI SAAT HALAMAN DIBUKA
+// ============================================================================
+loadState();
+initLuxuryCars();
+initAuthUI();
+renderFeed();
+requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
