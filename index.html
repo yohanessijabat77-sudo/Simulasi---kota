@@ -3,761 +3,1474 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simulasi Kota – Kerangka Tampilan & Peta</title>
+  <title>Simulasi Kota: INDONESIA MERDEKA</title>
   <style>
     :root {
-      --bg-outer: #111827;
-      --bg-app: #ecfdf5;
-      --road: #e5e7eb;
-      --road-line: #ffffff;
-      --card-dark: #5c1922;
-      --card-green: #144536;
-      --accent-yellow: #facc15;
+      --merah: #9e1b24;
+      --merah-gelap: #6e1017;
+      --hijau: #14532d;
+      --hijau-muda: #166534;
+      --emas: #eab308;
+      --bg: #f4f5f7;
+      --kartu: #ffffff;
+      --teks: #18181b;
+      --muted: #6b7280;
+      --border: #e5e7eb;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      background-color: var(--bg-outer);
-      display: flex;
-      justify-content: center;
-      min-height: 100vh;
+      background: var(--bg);
+      color: var(--teks);
+      padding-bottom: 48px;
     }
 
-    /* Container Utama Ala Mobile */
-    .app-shell {
-      width: 100%;
-      max-width: 430px;
-      background-color: var(--bg-app);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      background-image: 
-        linear-gradient(to right, var(--road) 24px, transparent 24px),
-        linear-gradient(to bottom, var(--road) 24px, transparent 24px);
-      background-size: 140px 140px;
-    }
-
-    /* Ticker Siaran Kota */
-    .news-ticker {
-      background-color: #7f1d1d;
-      color: #ffffff;
-      font-size: 12px;
-      padding: 8px 12px;
-      white-space: nowrap;
-      overflow: hidden;
-      font-weight: 500;
+    .topbar {
+      background: #111827;
+      color: #fff;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
-      z-index: 10;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 20;
     }
 
-    .dot-live {
-      width: 8px;
-      height: 8px;
-      background-color: #ffffff;
-      border-radius: 50%;
-      display: inline-block;
-      flex-shrink: 0;
-    }
-
-    .ticker-text {
-      display: inline-block;
-      animation: marquee 18s linear infinite;
-    }
-
-    @keyframes marquee {
-      0% { transform: translateX(10%); }
-      100% { transform: translateX(-100%); }
-    }
-
-    /* Area Peta & HUD */
-    .map-viewport {
-      flex: 1;
-      padding: 12px;
-      display: flex;
-      gap: 10px;
-      position: relative;
-    }
-
-    .hud-left {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 5;
-    }
-
-    /* Kartu Status Hari & Warga */
-    .card-status {
-      background: linear-gradient(135deg, #691b25, #471118);
-      color: white;
-      border-radius: 16px;
-      padding: 14px 16px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.18);
-    }
-
-    .badge-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
+    .topbar-title {
+      font-size: 15px;
       font-weight: 700;
-      margin-bottom: 6px;
+      letter-spacing: 0.3px;
     }
 
-    .badge-day {
-      background-color: var(--accent-yellow);
-      color: #1f2937;
-      padding: 3px 8px;
-      border-radius: 6px;
-    }
-
-    .status-active {
-      color: #e5e7eb;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .card-status h2 {
-      font-size: 22px;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
-    }
-
-    .card-status p {
+    .topbar-sub {
       font-size: 11px;
-      color: #fca5a5;
+      color: #d1d5db;
     }
 
-    /* Kartu Proyek Stasiun Kota */
-    .card-project {
-      background: linear-gradient(135deg, #1b4d3e, #0f3328);
-      color: white;
-      border-radius: 16px;
-      padding: 12px 14px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.18);
-    }
-
-    .project-header {
+    .banner-kota {
+      background: linear-gradient(90deg, var(--merah-gelap), var(--merah));
+      color: #fff;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .project-title {
-      font-size: 13px;
+    .event-bar {
+      background: #fef3c7;
+      color: #78350f;
+      border-bottom: 1px solid #fde68a;
+      padding: 8px 16px;
+      font-size: 12px;
       font-weight: 700;
       display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 16px auto;
+      padding: 0 14px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid-utama {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      gap: 12px;
+      align-items: start;
+    }
+
+    @media (max-width: 640px) {
+      .grid-utama {
+        grid-template-columns: 1fr;
+      }
+      .side-menu {
+        grid-template-columns: repeat(3, 1fr) !important;
+      }
+    }
+
+    .card {
+      background: var(--kartu);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    .card-merah {
+      background: linear-gradient(135deg, var(--merah-gelap), var(--merah));
+      color: #fff;
+      border: none;
+    }
+
+    .card-hijau {
+      background: linear-gradient(135deg, var(--hijau), var(--hijau-muda));
+      color: #fff;
+      border: none;
+    }
+
+    .row-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
       align-items: center;
       gap: 6px;
-    }
-
-    .btn-patungan {
-      background-color: var(--accent-yellow);
-      color: #111827;
-      border: none;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
       border-radius: 999px;
-      padding: 5px 10px;
-      font-size: 10px;
+      background: rgba(255, 255, 255, 0.16);
+      text-transform: uppercase;
+    }
+
+    .dot-aktif {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      display: inline-block;
+    }
+
+    .warga-big {
+      font-size: 32px;
       font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.1s;
+      margin-top: 8px;
+      line-height: 1.1;
     }
 
-    .btn-patungan:active {
-      transform: scale(0.94);
+    .muted-light {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 13px;
+      margin-top: 4px;
     }
 
-    .project-stats {
-      font-size: 12px;
-      color: #d1fae5;
-      margin-bottom: 6px;
+    .poin-pill {
+      background: rgba(0, 0, 0, 0.25);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      text-align: right;
     }
 
-    .progress-bar-bg {
-      width: 100%;
-      height: 6px;
-      background-color: rgba(255,255,255,0.2);
+    .progress-wrap {
+      background: rgba(255, 255, 255, 0.22);
+      height: 10px;
       border-radius: 999px;
       overflow: hidden;
+      margin-top: 10px;
     }
 
-    .progress-bar-fill {
+    .progress-fill {
       height: 100%;
-      width: 15%;
-      background-color: var(--accent-yellow);
+      background: var(--emas);
+      width: 0%;
       transition: width 0.3s ease;
     }
 
-    /* Landmark Peta (Balai Kota) */
-    .map-landmark {
-      position: absolute;
-      bottom: 35px;
-      left: 38%;
-      transform: translateX(-50%);
-      background-color: #d1fae5;
-      border: 2px dashed #6ee7b7;
-      color: #065f46;
-      padding: 12px 18px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 700;
-      opacity: 0.85;
-      pointer-events: none;
-    }
-
-    /* Menu Tombol Kanan */
-    .hud-right {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 5;
-    }
-
-    .side-btn {
-      width: 66px;
-      height: 66px;
-      background-color: #ffffff;
-      border: 2px solid #e5e7eb;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-      transition: transform 0.1s, background-color 0.2s;
-    }
-
-    .side-btn:active {
-      transform: scale(0.93);
-      background-color: #fef9c3;
-    }
-
-    .side-btn-icon {
-      font-size: 20px;
-    }
-
-    .side-btn-label {
-      font-size: 10px;
-      font-weight: 800;
-      color: #1f2937;
-    }
-
-    /* Panel Bawah (Chat & Profil Warga) */
-    .bottom-dock {
-      background-color: #ffffff;
-      border-top: 1px solid #e5e7eb;
-      padding: 10px 12px 16px;
-      display: flex;
-      flex-direction: column;
+    .milestone-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
       gap: 8px;
-      z-index: 10;
-    }
-
-    .chat-preview-bar {
-      background-color: #f3f4f6;
-      border-radius: 12px;
-      padding: 9px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      font-size: 12px;
-      color: #4b5563;
-    }
-
-    .chat-preview-bar strong {
-      color: #111827;
+      margin-top: 12px;
       font-size: 11px;
     }
 
-    .player-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
+    .milestone-box {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 8px 10px;
     }
 
-    .player-pill {
-      flex: 1;
-      background-color: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 8px 10px;
-      font-size: 12px;
-      color: #111827;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .milestone-box.done {
+      background: rgba(234, 179, 8, 0.24);
+      border: 1px solid var(--emas);
     }
 
-    .timer-pill {
-      background-color: #fee2e2;
-      color: #b91c1c;
-      border-radius: 12px;
-      padding: 8px 10px;
-      font-size: 12px;
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 9px 14px;
       font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 0.08s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-emas {
+      background: var(--emas);
+      color: #18181b;
+    }
+
+    .btn-merah {
+      background: var(--merah);
+      color: #fff;
+    }
+
+    .btn-hijau {
+      background: var(--hijau);
+      color: #fff;
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--teks);
+      border: 1px solid var(--border);
+    }
+
+    .side-menu {
+      display: grid;
+      gap: 10px;
+    }
+
+    .side-btn {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .side-btn.active {
+      border-color: var(--emas);
+      background: #fefce8;
+    }
+
+    .side-btn .icon {
+      font-size: 22px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .side-btn .label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+    }
+
+    .notif-dot {
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+
+    /* Avatar ringan */
+    .avatar-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: 800;
+      flex-shrink: 0;
+      position: relative;
+      user-select: none;
+    }
+
+    .avatar-sm {
+      width: 28px;
+      height: 28px;
+      font-size: 14px;
+    }
+
+    .avatar-md {
+      width: 38px;
+      height: 38px;
+      font-size: 18px;
+    }
+
+    .avatar-lg {
+      width: 52px;
+      height: 52px;
+      font-size: 24px;
+    }
+
+    .avatar-jabatan-tag {
+      position: absolute;
+      bottom: -3px;
+      right: -3px;
+      font-size: 11px;
+      line-height: 1;
+      background: #fff;
+      border-radius: 999px;
+      padding: 1px 2px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .role-presiden {
+      background: #fef3c7;
+      border: 2px solid #eab308;
+      color: #78350f;
+    }
+
+    .role-pm {
+      background: #dbeafe;
+      border: 2px solid #2563eb;
+      color: #1e3a8a;
+    }
+
+    .role-gubernur {
+      background: #f3e8ff;
+      border: 2px solid #7c3aed;
+      color: #4c1d95;
+    }
+
+    .role-masyarakat {
+      background: #dcfce7;
+      border: 2px solid #16a34a;
+      color: #14532d;
+    }
+
+    .avatar-chip-list {
       display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .avatar-chip {
+      display: inline-flex;
       align-items: center;
       gap: 4px;
-    }
-
-    .ktp-mini-btn {
-      background-color: #f3f4f6;
-      border: 1px solid #d1d5db;
-      border-radius: 12px;
-      padding: 8px 10px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    /* Toast Notifikasi Mengambang */
-    .toast {
-      position: absolute;
-      top: 44px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      background-color: #111827;
-      color: #facc15;
-      padding: 8px 14px;
+      background: #fff;
+      border: 1px solid #cbd5e1;
       border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.25s ease;
-      z-index: 50;
-      white-space: nowrap;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      padding: 2px 7px 2px 3px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #1e293b;
     }
 
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
+    .avatar-chip.aktif-chip {
+      border-color: var(--merah);
+      background: #fef2f2;
+      color: var(--merah-gelap);
     }
 
-    /* Modal / Popup Interaktif */
-    .modal-backdrop {
-      position: absolute;
-      inset: 0;
-      background-color: rgba(17, 24, 39, 0.6);
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-      z-index: 40;
-    }
-
-    .modal-backdrop.active {
-      display: flex;
-    }
-
-    .modal-sheet {
-      width: 100%;
-      background-color: #ffffff;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-      padding: 18px;
-      animation: slideUp 0.22s ease-out;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    .modal-header {
+    .sektor-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #e5e7eb;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .modal-close {
-      background: #f3f4f6;
-      border: none;
-      border-radius: 8px;
-      padding: 4px 10px;
-      font-weight: 700;
+    .petak-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .petak {
+      border: 1.5px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 12px;
+      background: #f8fafc;
       cursor: pointer;
     }
 
-    /* Styling Kartu E-KTP */
-    .ektp-card {
-      background: linear-gradient(135deg, #0284c7, #0369a1);
-      color: white;
-      border-radius: 14px;
-      padding: 14px;
-      font-size: 12px;
-      line-height: 1.6;
+    .petak.terisi {
+      border-style: solid;
+      border-color: #86efac;
+      background: #f0fdf4;
     }
 
-    .ektp-card h4 {
-      text-align: center;
-      border-bottom: 1px solid rgba(255,255,255,0.3);
-      padding-bottom: 6px;
-      margin-bottom: 8px;
-      letter-spacing: 1px;
+    .petak-title {
+      font-size: 13px;
+      font-weight: 700;
     }
 
-    /* Styling Panel Global Chat */
-    .chat-messages {
-      height: 180px;
-      overflow-y: auto;
-      background-color: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .petak-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
       margin-bottom: 10px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+    }
+
+    label {
+      display: block;
       font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #374151;
     }
 
-    .chat-bubble {
-      background-color: #ffffff;
-      border: 1px solid #e5e7eb;
-      padding: 6px 10px;
-      border-radius: 10px;
-    }
-
-    .chat-bubble.self {
-      background-color: #ecfdf5;
-      border-color: #a7f3d0;
-      align-self: flex-end;
-    }
-
-    .chat-input-row {
-      display: flex;
-      gap: 6px;
-    }
-
-    .chat-input-row input {
-      flex: 1;
-      padding: 8px 10px;
+    input, select {
+      width: 100%;
+      padding: 9px 11px;
       border: 1px solid #d1d5db;
       border-radius: 10px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    .ktp-card {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef2f2 100%);
+      border: 2px solid var(--merah);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-top: 12px;
+    }
+
+    .ktp-header {
+      border-bottom: 2px solid var(--merah);
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ktp-negara {
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--merah);
+      letter-spacing: 0.6px;
+    }
+
+    .ktp-body {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .ktp-rows {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .ktp-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .ktp-val {
+      font-weight: 800;
+      color: #111827;
+      margin-top: 2px;
+    }
+
+    .list-warga {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .warga-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+
+    .warga-item.aktif {
+      border-color: var(--merah);
+      background: #fef2f2;
+    }
+
+    .log-box {
+      max-height: 230px;
+      overflow-y: auto;
+      display: grid;
+      gap: 6px;
+      margin-top: 8px;
       font-size: 12px;
     }
 
-    .chat-input-row button {
-      background-color: #059669;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 0 14px;
+    .log-item {
+      background: #f9fafb;
+      border-left: 3px solid var(--hijau);
+      padding: 7px 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .tab-btn {
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--merah);
+      color: #fff;
+      border-color: var(--merah);
+    }
+
+    .safety-note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e3a8a;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
     }
   </style>
 </head>
 <body>
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">SIMULASI KOTA • INDONESIA MERDEKA</div>
+      <div class="topbar-sub">Kontrol Karakter Mandiri per Perangkat</div>
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+      <button class="btn btn-outline" style="padding:6px 10px; font-size:11px;" onclick="majuHari()">+1 Hari</button>
+      <button class="btn btn-outline" style="padding:6px 10px; font-size:11px;" onclick="exportData()">Backup JSON</button>
+      <button class="btn btn-outline" style="padding:6px 10px; font-size:11px;" onclick="document.getElementById('fileImportJson').click()">Import JSON</button>
+      <input type="file" id="fileImportJson" accept=".json" class="hidden" onchange="importData(event)" />
+    </div>
+  </div>
 
-<div class="app-shell">
-  <!-- Toast Notifikasi -->
-  <div id="toast" class="toast">+50 Poin Kerja!</div>
-
-  <!-- Siaran Kota -->
-  <div class="news-ticker">
-    <span class="dot-live"></span>
-    <span class="ticker-text" id="tickerText">
-      KOTA SIARAN — Selamat datang di Simulasi Kota! Geser peta atau klik tombol KERJA untuk mengumpulkan poin pembangunan.
+  <div class="banner-kota">
+    <span id="teksSambutan">Selamat datang di Simulasi Kota INDONESIA MERDEKA!</span>
+    <span id="infoAktifKontrol" style="background:rgba(0,0,0,0.22); padding:3px 10px; border-radius:999px; font-size:11px; display:inline-flex; align-items:center; gap:6px;">
+      Karakter Aktif: Belum ada
     </span>
   </div>
 
-  <!-- Viewport Peta & HUD -->
-  <div class="map-viewport">
-    <div class="hud-left">
-      <!-- Kartu Status -->
-      <div class="card-status">
-        <div class="badge-row">
-          <span class="badge-day" id="dayBadge">DAY 1</span>
-          <span class="status-active">● AKTIF</span>
-        </div>
-        <h2>WARGA: <span id="citizenCount">5</span></h2>
-        <p>Diperbarui otomatis • Sektor 1–4 terbuka</p>
-      </div>
-
-      <!-- Kartu Proyek Stasiun Kota -->
-      <div class="card-project">
-        <div class="project-header">
-          <div class="project-title">🚆 Proyek Stasiun Kota</div>
-          <button class="btn-patungan" onclick="openPatunganModal()">PATUNGAN &gt;</button>
-        </div>
-        <div class="project-stats" id="projectStats">
-          7.500 Poin / 50.000 Poin (15%)
-        </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="projectProgress"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Landmark Peta -->
-    <div class="map-landmark">🏛️ Balai Kota</div>
-
-    <!-- Tombol Aksi Kanan -->
-    <div class="hud-right">
-      <button class="side-btn" onclick="doWork()">
-        <span class="side-btn-icon">💼</span>
-        <span class="side-btn-label">KERJA</span>
-      </button>
-
-      <button class="side-btn" onclick="openKtpModal()">
-        <span class="side-btn-icon">🪪</span>
-        <span class="side-btn-label">E-KTP</span>
-      </button>
-
-      <button class="side-btn" onclick="showToast('Sektor 1–4 sudah terbuka!')">
-        <span class="side-btn-icon">🗺️</span>
-        <span class="side-btn-label">SEKTOR</span>
-      </button>
-    </div>
+  <div class="event-bar">
+    <span id="teksEventHarian">📣 Event Hari Ini: Memuat berita kota...</span>
+    <span id="sisaKuotaKerja" style="font-size:11px;">Kuota Kerja/Hari: 6x</span>
   </div>
 
-  <!-- Panel Bawah -->
-  <div class="bottom-dock">
-    <div class="chat-preview-bar" onclick="openChatModal()">
-      <span id="lastChatPreview">💬 Global Chat — ketuk untuk membuka obrolan</span>
-      <strong>CHAT</strong>
-    </div>
+  <div class="container">
+    <div class="grid-utama">
+      <div style="display:grid; gap:12px;">
+        <div class="card card-merah">
+          <div class="row-between">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <span class="badge" id="labelDay">DAY 1</span>
+              <span class="badge"><span class="dot-aktif"></span> AKTIF</span>
+            </div>
+            <span class="badge">Update: 30d</span>
+          </div>
 
-    <div class="player-bar">
-      <div class="player-pill">
-        <span><strong>Yohan</strong> • <span id="playerStatusShort">Warga Baru</span></span>
-        <strong><span id="playerPoints">150</span> Poin</strong>
-      </div>
-      <div class="timer-pill">
-        ⏱️ <span id="gameTimer">01:45</span>
-      </div>
-      <button class="ktp-mini-btn" onclick="openKtpModal()">🪪 KTP</button>
-    </div>
-  </div>
+          <div class="row-between" style="margin-top:10px;">
+            <div>
+              <div class="warga-big" id="jumlahWargaTampil">WARGA: 0</div>
+              <div class="muted-light">Sektor 1–4 terbuka • #1 Presiden, #2–#50 PM, #51–#101 Gubernur, #102+ Masyarakat</div>
+            </div>
+            <div class="poin-pill" id="saldoWargaAktif">💰 0 Poin<br/><span style="font-size:11px; font-weight:600;">⚡ Energi: 0/100</span></div>
+          </div>
+        </div>
 
-  <!-- MODAL 1: E-KTP / KTP -->
-  <div id="modalKtp" class="modal-backdrop" onclick="closeModalOnBackdrop(event, 'modalKtp')">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3>Identitas Warga (E-KTP)</h3>
-        <button class="modal-close" onclick="closeModal('modalKtp')">Tutup</button>
+        <div class="card card-hijau">
+          <div class="row-between">
+            <div style="font-size:17px; font-weight:800;">🚆 Proyek Stasiun Kota</div>
+            <button class="btn btn-emas" onclick="bukaPanel('proyek')">PATUNGAN &gt;</button>
+          </div>
+          <div class="row-between" style="margin-top:10px; font-size:13px; font-weight:700;">
+            <span id="teksProgresProyek">0 Poin / 50.000 Poin</span>
+            <span id="persenProyek">0%</span>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-fill" id="barProyek"></div>
+          </div>
+          <div class="milestone-list" id="daftarMilestone"></div>
+        </div>
       </div>
-      <div class="ektp-card">
-        <h4>KARTU TANDA PENDUDUK KOTA</h4>
-        <div><strong>NIK Kota:</strong> 2026-0001-YHN</div>
-        <div><strong>Nama:</strong> Yohan</div>
-        <div><strong>Status Warga:</strong> <span id="ktpStatus">Warga Baru</span></div>
-        <div><strong>Domisili:</strong> Sektor 1 (Pusat Balai Kota)</div>
-        <div><strong>Total Kontribusi Proyek:</strong> <span id="ktpContributed">0</span> Poin</div>
-        <div><strong>Saldo Poin Saat Ini:</strong> <span id="ktpPoints">150</span> Poin</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- MODAL 2: PATUNGAN PROYEK STASIUN -->
-  <div id="modalPatungan" class="modal-backdrop" onclick="closeModalOnBackdrop(event, 'modalPatungan')">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3>🚆 Patungan Proyek Stasiun Kota</h3>
-        <button class="modal-close" onclick="closeModal('modalPatungan')">Tutup</button>
-      </div>
-      <p style="font-size: 12px; color: #4b5563; margin-bottom: 12px;">
-        Sumbangkan poin kerjamu untuk mempercepat pembangunan Stasiun Kota!
-      </p>
-      <div style="display: flex; gap: 8px;">
-        <button onclick="donateProject(50)" style="flex:1; padding:10px; border:none; border-radius:10px; background:#059669; color:white; font-weight:700; cursor:pointer;">
-          +50 Poin
+      <div class="side-menu">
+        <button class="side-btn active" id="menu-kerja" onclick="bukaPanel('kerja')">
+          <span class="notif-dot"></span>
+          <span class="icon">💼</span>
+          <span class="label">KERJA</span>
         </button>
-        <button onclick="donateProject(100)" style="flex:1; padding:10px; border:none; border-radius:10px; background:#0284c7; color:white; font-weight:700; cursor:pointer;">
-          +100 Poin
+        <button class="side-btn" id="menu-ktp" onclick="bukaPanel('ktp')">
+          <span class="icon">🪪</span>
+          <span class="label">E-KTP</span>
         </button>
-        <button onclick="donateProject('all')" style="flex:1; padding:10px; border:none; border-radius:10px; background:#d97706; color:white; font-weight:700; cursor:pointer;">
-          Semua Poin
+        <button class="side-btn" id="menu-sektor" onclick="bukaPanel('sektor')">
+          <span class="icon">🗺️</span>
+          <span class="label">SEKTOR</span>
         </button>
       </div>
     </div>
-  </div>
 
-  <!-- MODAL 3: GLOBAL CHAT -->
-  <div id="modalChat" class="modal-backdrop" onclick="closeModalOnBackdrop(event, 'modalChat')">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3>💬 Global Chat Warga Kota</h3>
-        <button class="modal-close" onclick="closeModal('modalChat')">Tutup</button>
+    <div class="card">
+      <div class="sektor-bar">
+        <div style="font-weight:800; font-size:14px;" id="judulSektorAktif">📍 Sektor 1 — Pusat Kota</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="tab-btn active" data-sektor="1" onclick="pilihSektor(1)">Sektor 1</button>
+          <button class="tab-btn" data-sektor="2" onclick="pilihSektor(2)">Sektor 2</button>
+          <button class="tab-btn" data-sektor="3" onclick="pilihSektor(3)">Sektor 3</button>
+          <button class="tab-btn" data-sektor="4" onclick="pilihSektor(4)">Sektor 4</button>
+        </div>
       </div>
-      <div class="chat-messages" id="chatMessages">
-        <div class="chat-bubble"><strong>Budi (Sektor 2):</strong> Ayo patungan biar stasiun cepat jadi!</div>
-        <div class="chat-bubble"><strong>Sari (Warga Tetap):</strong> Baru selesai shift kerja, lumayan dapat +50 poin.</div>
+      <div class="hint">Ketuk petak untuk klaim/kelola (150 Poin) atau kunjungi (+25 Poin). Avatar pemain tampil langsung di petak posisinya.</div>
+      <div class="petak-grid" id="gridPetak"></div>
+    </div>
+
+    <div class="card" id="panelInteraktif">
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-kerja" onclick="bukaPanel('kerja')">💼 Kerja & Belanja</button>
+        <button class="tab-btn" id="tab-ktp" onclick="bukaPanel('ktp')">🪪 E-KTP & Daftar</button>
+        <button class="tab-btn" id="tab-proyek" onclick="bukaPanel('proyek')">🚆 Patungan Proyek</button>
+        <button class="tab-btn" id="tab-sektor" onclick="bukaPanel('sektor')">🗺️ Aturan & Sektor</button>
       </div>
-      <div class="chat-input-row">
-        <input type="text" id="chatInput" placeholder="Ketik pesan ke warga kota..." onkeypress="if(event.key==='Enter') sendChat()" />
-        <button onclick="sendChat()">Kirim</button>
+
+      <div id="subpanel-kerja">
+        <div class="section-title">Kontrol Kerja & Usaha Karakter</div>
+        <div class="form-grid">
+          <div>
+            <label>Pekerjaan / Usaha Karakter</label>
+            <select id="selectPekerjaan" onchange="updateInfoPekerjaan()">
+              <option value="Pengantar Paket">📦 Pengantar Paket</option>
+              <option value="Toko Baju">👕 Toko Baju</option>
+              <option value="Rumah Makan Aceh">🍜 Rumah Makan Aceh</option>
+              <option value="Rumah Makan Minang">🍛 Rumah Makan Minang</option>
+              <option value="Rumah Makan Batak (BPK)">🥩 Rumah Makan Batak (BPK)</option>
+            </select>
+          </div>
+          <div>
+            <label>Catatan Aksi / Kiriman / Menu</label>
+            <input type="text" id="inputAksiKerja" maxlength="80" placeholder="Contoh: Antar paket / Jual koleksi baju / Masak menu" />
+          </div>
+          <div style="display:flex; align-items:flex-end;">
+            <button class="btn btn-hijau" style="width:100%;" onclick="jalankanKerja()">Jalankan Kerja (-15 ⚡)</button>
+          </div>
+        </div>
+        <div class="hint" id="infoKhususPekerjaan"></div>
+
+        <hr style="margin:16px 0; border:none; border-top:1px solid var(--border);" />
+
+        <div class="section-title">Belanja / Pesan ke Warga Lain (Dengan Efek Khas)</div>
+        <div class="form-grid">
+          <div>
+            <label>Pilih Tujuan / Lapak Warga</label>
+            <select id="selectTargetWarga"></select>
+          </div>
+          <div>
+            <label>Pilih Menu / Item Khas</label>
+            <select id="selectItemKhas">
+              <option value="Mi Aceh & Kopi Gayo (+30 Energi)">Mi Aceh & Kopi Gayo (+30 ⚡ Energi)</option>
+              <option value="Nasi Rendang & Gulai (+35 Poin Kerja Berikutnya)">Nasi Rendang & Gulai (+35 Poin Kerja Berikutnya)</option>
+              <option value="Paket BPK & Andaliman (+25 ⚡ & +25 Poin Kerja)">Paket BPK & Andaliman (+25 ⚡ & +25 Poin Kerja)</option>
+              <option value="Koleksi Baju / Outfit Kota (+Gaya Warga)">Koleksi Baju / Outfit Kota (+Gaya Warga)</option>
+              <option value="Jasa Kirim Express Paket (+15 ⚡ Energi)">Jasa Kirim Express Paket (+15 ⚡ Energi)</option>
+            </select>
+          </div>
+          <div>
+            <label>Jumlah Poin (Maks. 2.000/transaksi)</label>
+            <input type="number" id="inputNominalKirim" value="100" min="10" max="2000" step="10" />
+          </div>
+          <div style="display:flex; align-items:flex-end;">
+            <button class="btn btn-merah" style="width:100%;" onclick="kirimPesananPoin()">Kirim Pesanan & Poin</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="subpanel-ktp" class="hidden">
+        <div class="section-title">Daftar Warga Baru — KTP Masyarakat "INDONESIA MERDEKA"</div>
+        <div class="form-grid">
+          <div>
+            <label>Nama (Bebas)</label>
+            <input type="text" id="inputNama" maxlength="40" placeholder="Contoh: Raka Pratama" />
+          </div>
+          <div>
+            <label>Nama Panggilan (Bebas)</label>
+            <input type="text" id="inputPanggilan" maxlength="25" placeholder="Contoh: Raka" />
+          </div>
+          <div>
+            <label>Pilihan Pekerjaan Awal</label>
+            <select id="inputKerjaAwal">
+              <option value="Pengantar Paket">📦 Pengantar Paket</option>
+              <option value="Toko Baju">👕 Toko Baju</option>
+              <option value="Rumah Makan Aceh">🍜 Rumah Makan Aceh</option>
+              <option value="Rumah Makan Minang">🍛 Rumah Makan Minang</option>
+              <option value="Rumah Makan Batak (BPK)">🥩 Rumah Makan Batak (BPK)</option>
+            </select>
+          </div>
+          <div style="display:flex; align-items:flex-end;">
+            <button class="btn btn-merah" style="width:100%;" onclick="daftarWargaBaru()">Terbitkan KTP</button>
+          </div>
+        </div>
+
+        <div class="safety-note">
+          🔒 <strong>Keamanan Data & Privasi:</strong> Cukup isi Nama (bebas) dan Nama Panggilan (bebas). Hindari memasukkan data sensitif dunia nyata (alamat asli, nomor HP, NIK asli) agar akun/identitas warga tetap aman.
+        </div>
+
+        <div id="tampilanKtpAktif"></div>
+
+        <div style="margin-top:16px;">
+          <div class="row-between">
+            <div class="section-title" style="margin:0;">Daftar Warga Terdaftar (Pilih Kontrol Perangkat)</div>
+            <button class="btn btn-outline" style="padding:5px 10px; font-size:11px;" onclick="resetDataKonfirmasi()">Reset Kota</button>
+          </div>
+          <div class="list-warga" id="daftarWargaList"></div>
+        </div>
+      </div>
+
+      <div id="subpanel-proyek" class="hidden">
+        <div class="section-title">Patungan Proyek Stasiun Kota</div>
+        <p class="hint" style="margin-bottom:10px;">
+          Target proyek: <strong>50.000 Poin</strong> dengan 4 tahap <em>milestone</em> (25%, 50%, 75%, 100%).
+        </p>
+        <div class="form-grid">
+          <div>
+            <label>Jumlah Poin Patungan</label>
+            <input type="number" id="inputPatungan" value="250" min="50" max="10000" step="50" />
+          </div>
+          <div style="display:flex; align-items:flex-end;">
+            <button class="btn btn-emas" style="width:100%;" onclick="patunganProyek()">Sumbang Poin Proyek</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="subpanel-sektor" class="hidden">
+        <div class="section-title">Aturan Main, Keamanan & 4 Sektor</div>
+        <div style="display:grid; gap:8px; font-size:13px;">
+          <div><strong>Avatar & Jabatan Otomatis:</strong> #1 👑 Presiden, #2–#50 🎖️ Perdana Menteri, #51–#101 🏛️ Gubernur, #102+ 🧑 Masyarakat.</div>
+          <div><strong>Keamanan & Anti-Spam:</strong> Maksimal 6x kerja/hari per warga (reset saat +1 Hari) dan batas transaksi/patungan agar ekonomi tetap seimbang.</div>
+          <div><strong>Sektor 1 — Pusat Kota:</strong> Balai kota & titik awal warga.</div>
+          <div><strong>Sektor 2 — Kawasan Niaga & Kuliner:</strong> Toko Baju, Rumah Makan Aceh, Rumah Makan Minang, Rumah Makan Batak (BPK).</div>
+          <div><strong>Sektor 3 — Logistik & Distribusi:</strong> Jalur kirim Pengantar Paket.</div>
+          <div><strong>Sektor 4 — Hunian & Stasiun:</strong> Pengembangan warga & koneksi Proyek Stasiun Kota.</div>
+        </div>
       </div>
     </div>
+
+    <div class="card">
+      <div class="section-title" style="margin-bottom:4px;">📜 Log Aktivitas Kota</div>
+      <div class="hint">Avatar pemain otomatis muncul di setiap aktivitas kerja, belanja, gerak sektor, dan patungan.</div>
+      <div class="log-box" id="logAktivitas"></div>
+    </div>
   </div>
-</div>
 
-<script>
-  // State Utama Game
-  const state = {
-    day: 1,
-    citizens: 5,
-    points: 150,
-    contributed: 0,
-    projectCurrent: 7500,
-    projectTarget: 50000,
-    secondsLeft: 105 // 01:45
-  };
+  <script>
+    const STORAGE_KEY = "simulasi_kota_indonesia_merdeka_v3";
+    const TARGET_PROYEK = 50000;
+    const KUOTA_KERJA_HARIAN = 6;
 
-  // Format angka ribuan dengan titik (contoh: 7.500)
-  function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  }
+    const NAMA_SEKTOR = {
+      1: "Sektor 1 — Pusat Kota",
+      2: "Sektor 2 — Kawasan Niaga & Kuliner",
+      3: "Sektor 3 — Logistik & Distribusi",
+      4: "Sektor 4 — Hunian & Stasiun"
+    };
 
-  // Hitung status warga otomatis berdasarkan poin/kontribusi
-  function getCitizenRank() {
-    const totalScore = state.points + state.contributed;
-    if (totalScore >= 500) return "Donatur Utama";
-    if (totalScore >= 250) return "Warga Aktif";
-    return "Warga Baru";
-  }
+    const PETAK_TEMPLATE = {
+      1: ["Balai Kota", "Alun-Alun", "Pos Pantau", "Papan Pengumuman", "Gerbang Kota", "Taman Warga"],
+      2: ["Lapak Kuliner", "Butik & Baju", "Pasar Pagi", "Kedai Kopi", "Rumah Makan", "Pusat Niaga"],
+      3: ["Gudang Paket", "Jalur Kirim A", "Jalur Kirim B", "Pos Kurir", "Area Bongkar", "Pusat Rute"],
+      4: ["Peron Stasiun", "Komplek Warga", "Taman Kota", "Pusat Komunitas", "Kantor Wilayah", "Area Baru"]
+    };
 
-  // Perbarui seluruh tampilan UI
-  function updateUI() {
-    document.getElementById("dayBadge").textContent = `DAY ${state.day}`;
-    document.getElementById("citizenCount").textContent = state.citizens;
-    document.getElementById("playerPoints").textContent = formatNumber(state.points);
-    document.getElementById("playerStatusShort").textContent = getCitizenRank();
+    const INFO_PEKERJAAN = {
+      "Pengantar Paket": "Fokus antar kiriman antar-petak/sektor. Bonus poin saat event Lonjakan Paket.",
+      "Toko Baju": "Menjual pakaian & koleksi kota ke warga serta pejabat untuk menambah gaya warga.",
+      "Rumah Makan Aceh": "Menyajikan menu khas Aceh yang memulihkan energi warga saat dipesan.",
+      "Rumah Makan Minang": "Menyajikan hidangan Minang yang menambah bonus poin kerja berikutnya.",
+      "Rumah Makan Batak (BPK)": "Menyajikan kuliner khas Batak (BPK) sebagai pusat kumpul dengan bonus energi & poin kerja."
+    };
 
-    // Update KTP Modal
-    document.getElementById("ktpStatus").textContent = getCitizenRank();
-    document.getElementById("ktpContributed").textContent = formatNumber(state.contributed);
-    document.getElementById("ktpPoints").textContent = formatNumber(state.points);
+    const IKON_PEKERJAAN = {
+      "Pengantar Paket": "📦",
+      "Toko Baju": "👕",
+      "Rumah Makan Aceh": "🍜",
+      "Rumah Makan Minang": "🍛",
+      "Rumah Makan Batak (BPK)": "🥩"
+    };
 
-    // Update Proyek Stasiun Kota
-    const percent = Math.min(100, ((state.projectCurrent / state.projectTarget) * 100));
-    const percentDisplay = percent % 1 === 0 ? percent : percent.toFixed(1);
-    document.getElementById("projectStats").textContent = 
-      `${formatNumber(state.projectCurrent)} Poin / ${formatNumber(state.projectTarget)} Poin (${percentDisplay}%)`;
-    document.getElementById("projectProgress").style.width = `${percent}%`;
-  }
+    const EVENT_HARIAN = [
+      { judul: "Festival Kuliner Nusantara", bonusKerja: 40, targetKerja: "" },
+      { judul: "Lonjakan Kiriman Paket Kota", bonusKerja: 45, targetKerja: "Pengantar Paket" },
+      { judul: "Musim Belanja Toko Baju", bonusKerja: 35, targetKerja: "Toko Baju" },
+      { judul: "Hari Gotong Royong & Semangat Kota", bonusKerja: 50, targetKerja: "" }
+    ];
 
-  // Notifikasi Toast
-  let toastTimeout;
-  function showToast(msg) {
-    const toast = document.getElementById("toast");
-    toast.textContent = msg;
-    toast.classList.add("show");
-    clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => toast.classList.remove("show"), 2000);
-  }
+    const MILESTONE_PROYEK = [
+      { persen: 25, poin: 12500, nama: "Tahap 1 (25%): Fondasi & Rel Awal" },
+      { persen: 50, poin: 25000, nama: "Tahap 2 (50%): Bangunan Utama Stasiun" },
+      { persen: 75, poin: 37500, nama: "Tahap 3 (75%): Peron & Jalur Sektor" },
+      { persen: 100, poin: 50000, nama: "Tahap 4 (100%): Stasiun Kota Beroperasi" }
+    ];
 
-  // 1. Fungsi Tombol KERJA
-  function doWork() {
-    const earned = 50;
-    state.points += earned;
-    state.secondsLeft += 10; // Bonus waktu 10 detik tiap kerja
-    updateTimerDisplay();
-    updateUI();
-    showToast(`💼 Kerja selesai! +${earned} Poin & +10 detik`);
-  }
+    let state = {
+      day: 1,
+      sektorAktif: 1,
+      aktifWargaId: null,
+      proyekPoin: 0,
+      warga: [],
+      petak: {},
+      log: []
+    };
 
-  // 2. Fungsi Tombol E-KTP / KTP
-  function openKtpModal() {
-    updateUI();
-    document.getElementById("modalKtp").classList.add("active");
-  }
-
-  // 3. Fungsi Tombol PATUNGAN >
-  function openPatunganModal() {
-    document.getElementById("modalPatungan").classList.add("active");
-  }
-
-  function donateProject(amount) {
-    const value = amount === "all" ? state.points : amount;
-    if (value <= 0 || state.points < value) {
-      showToast("❌ Poin tidak cukup! Klik KERJA dulu.");
-      return;
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     }
 
-    state.points -= value;
-    state.contributed += value;
-    state.projectCurrent = Math.min(state.projectTarget, state.projectCurrent + value);
-    updateUI();
-    closeModal("modalPatungan");
-    showToast(`🚆 Berhasil patungan ${formatNumber(value)} Poin!`);
-  }
-
-  // 4. Fungsi Panel GLOBAL CHAT
-  function openChatModal() {
-    document.getElementById("modalChat").classList.add("active");
-  }
-
-  function sendChat() {
-    const input = document.getElementById("chatInput");
-    const text = input.value.trim();
-    if (!text) return;
-
-    const chatBox = document.getElementById("chatMessages");
-    const bubble = document.createElement("div");
-    bubble.className = "chat-bubble self";
-    bubble.innerHTML = `<strong>Yohan (${getCitizenRank()}):</strong> ${text}`;
-    chatBox.appendChild(bubble);
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    document.getElementById("lastChatPreview").textContent = `💬 Yohan: ${text}`;
-    input.value = "";
-  }
-
-  // Tutup Modal
-  function closeModal(id) {
-    document.getElementById(id).classList.remove("active");
-  }
-
-  function closeModalOnBackdrop(e, id) {
-    if (e.target.id === id) closeModal(id);
-  }
-
-  // Timer Siklus Hari Otomatis
-  function updateTimerDisplay() {
-    const mins = String(Math.floor(state.secondsLeft / 60)).padStart(2, "0");
-    const secs = String(state.secondsLeft % 60).padStart(2, "0");
-    document.getElementById("gameTimer").textContent = `${mins}:${secs}`;
-  }
-
-  setInterval(() => {
-    if (state.secondsLeft > 0) {
-      state.secondsLeft--;
-    } else {
-      // Pergantian Hari Baru
-      state.day++;
-      state.citizens += 2;
-      state.secondsLeft = 105;
-      showToast(`🌅 Hari ke-${state.day}! +2 Warga baru datang.`);
+    function tentukanJabatan(nomorUrut) {
+      if (nomorUrut === 1) return "Presiden";
+      if (nomorUrut >= 2 && nomorUrut <= 50) return "Perdana Menteri";
+      if (nomorUrut >= 51 && nomorUrut <= 101) return "Gubernur";
+      return "Masyarakat";
     }
-    updateTimerDisplay();
-    updateUI();
-  }, 1000);
 
-  // Inisialisasi awal
-  updateUI();
-</script>
+    function getInfoAvatar(w) {
+      const ikonKerja = IKON_PEKERJAAN[w.pekerjaan] || "🧑";
+      let ikonJabatan = "🧑";
+      let roleClass = "role-masyarakat";
 
+      if (w.jabatan === "Presiden") {
+        ikonJabatan = "👑";
+        roleClass = "role-presiden";
+      } else if (w.jabatan === "Perdana Menteri") {
+        ikonJabatan = "🎖️";
+        roleClass = "role-pm";
+      } else if (w.jabatan === "Gubernur") {
+        ikonJabatan = "🏛️";
+        roleClass = "role-gubernur";
+      }
+      return { ikonKerja, ikonJabatan, roleClass };
+    }
+
+    function renderAvatarHTML(w, size = "md") {
+      if (!w) return "";
+      const { ikonKerja, ikonJabatan, roleClass } = getInfoAvatar(w);
+      return `
+        <span class="avatar-badge avatar-${size} ${roleClass}" title="#${w.nomorUrut} ${escapeHtml(w.panggilan)} (${w.jabatan} • ${w.pekerjaan})">
+          ${ikonKerja}
+          <span class="avatar-jabatan-tag">${ikonJabatan}</span>
+        </span>
+      `;
+    }
+
+    function getEventHariIni() {
+      return EVENT_HARIAN[(state.day - 1) % EVENT_HARIAN.length];
+    }
+
+    function initPetakDefault() {
+      [1, 2, 3, 4].forEach((s) => {
+        if (!state.petak[s]) {
+          state.petak[s] = PETAK_TEMPLATE[s].map((nama, idx) => ({
+            id: `${s}-${idx + 1}`,
+            nama,
+            pemilikId: null,
+            pemilikPanggilan: null,
+            fasilitas: "Kosong"
+          }));
+        }
+      });
+    }
+
+    function tambahLog(teks, wargaObj = null) {
+      const waktu = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+      state.log.unshift({
+        waktu: `Day ${state.day} • ${waktu}`,
+        teks,
+        wargaSnapshot: wargaObj
+          ? {
+              nomorUrut: wargaObj.nomorUrut,
+              panggilan: wargaObj.panggilan,
+              jabatan: wargaObj.jabatan,
+              pekerjaan: wargaObj.pekerjaan
+            }
+          : null
+      });
+      if (state.log.length > 70) state.log.pop();
+    }
+
+    function simpanState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function muatState() {
+      const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("simulasi_kota_indonesia_merdeka_v2");
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          state = { ...state, ...parsed };
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      initPetakDefault();
+      state.warga.forEach((w) => {
+        if (typeof w.energi !== "number") w.energi = 100;
+        if (typeof w.sisaKerja !== "number") w.sisaKerja = KUOTA_KERJA_HARIAN;
+        if (typeof w.bonusKerjaNext !== "number") w.bonusKerjaNext = 0;
+        if (!Array.isArray(w.koleksi)) w.koleksi = [];
+        if (typeof w.sektor !== "number") w.sektor = 1;
+        if (typeof w.petakIdx !== "number") w.petakIdx = 0;
+      });
+      if (!state.aktifWargaId && state.warga.length > 0) {
+        state.aktifWargaId = state.warga[0].id;
+      }
+      if (state.log.length === 0) {
+        tambahLog("Simulasi Kota INDONESIA MERDEKA siap dimulai. Terbitkan KTP anggota pertama!");
+      }
+    }
+
+    function getWargaAktif() {
+      return state.warga.find((w) => w.id === state.aktifWargaId) || null;
+    }
+
+    function daftarWargaBaru() {
+      const nama = document.getElementById("inputNama").value.trim();
+      const panggilan = document.getElementById("inputPanggilan").value.trim();
+      const pekerjaan = document.getElementById("inputKerjaAwal").value;
+
+      if (!nama || !panggilan) {
+        alert("Isi Nama (bebas) dan Nama Panggilan (bebas) terlebih dahulu.");
+        return;
+      }
+
+      const nomorUrut = state.warga.length + 1;
+      const jabatan = tentukanJabatan(nomorUrut);
+      const wargaBaru = {
+        id: "w-" + Date.now() + "-" + nomorUrut,
+        nomorUrut,
+        nama,
+        panggilan,
+        jabatan,
+        pekerjaan,
+        poin: 500,
+        energi: 100,
+        sisaKerja: KUOTA_KERJA_HARIAN,
+        bonusKerjaNext: 0,
+        koleksi: [],
+        sektor: state.sektorAktif,
+        petakIdx: 0
+      };
+
+      state.warga.push(wargaBaru);
+      state.aktifWargaId = wargaBaru.id;
+      document.getElementById("inputNama").value = "";
+      document.getElementById("inputPanggilan").value = "";
+
+      tambahLog(`KTP terbit: Anggota Ke-${nomorUrut} (${panggilan} • ${jabatan}) bergabung sebagai ${pekerjaan}.`, wargaBaru);
+      simpanState();
+      renderSemua();
+      bukaPanel("ktp");
+    }
+
+    function pilihKontrolWarga(id) {
+      state.aktifWargaId = id;
+      const w = getWargaAktif();
+      if (w) {
+        state.sektorAktif = w.sektor || 1;
+        tambahLog(`Perangkat beralih mengontrol karakter: ${w.panggilan} (Anggota Ke-${w.nomorUrut} • ${w.jabatan}).`, w);
+      }
+      simpanState();
+      renderSemua();
+    }
+
+    function jalankanKerja() {
+      const w = getWargaAktif();
+      if (!w) {
+        alert("Terbitkan atau pilih KTP warga terlebih dahulu di menu E-KTP.");
+        bukaPanel("ktp");
+        return;
+      }
+
+      if (w.sisaKerja <= 0) {
+        alert("Kuota kerja harian karakter ini sudah habis. Tekan '+1 Hari' untuk memulai hari baru.");
+        return;
+      }
+
+      if (w.energi < 15) {
+        alert("Energi kurang dari 15 ⚡! Pesan makanan/minuman ke Rumah Makan atau lanjut ke hari berikutnya.");
+        return;
+      }
+
+      const pekerjaanBaru = document.getElementById("selectPekerjaan").value;
+      const catatan = document.getElementById("inputAksiKerja").value.trim() || `Aktivitas ${pekerjaanBaru}`;
+      w.pekerjaan = pekerjaanBaru;
+      w.energi = Math.max(0, w.energi - 15);
+      w.sisaKerja -= 1;
+
+      let bonusJabatan = 0;
+      if (w.jabatan === "Presiden") bonusJabatan = 50;
+      else if (w.jabatan === "Perdana Menteri") bonusJabatan = 30;
+      else if (w.jabatan === "Gubernur") bonusJabatan = 20;
+
+      const ev = getEventHariIni();
+      const bonusEvent = (!ev.targetKerja || ev.targetKerja === w.pekerjaan) ? ev.bonusKerja : 0;
+      const bonusItem = w.bonusKerjaNext || 0;
+      w.bonusKerjaNext = 0;
+
+      const totalPoin = 150 + bonusJabatan + bonusEvent + bonusItem;
+      w.poin += totalPoin;
+      document.getElementById("inputAksiKerja").value = "";
+
+      const petakSekarang = (state.petak[w.sektor] && state.petak[w.sektor][w.petakIdx || 0]) ? state.petak[w.sektor][w.petakIdx || 0].nama : "Kota";
+      tambahLog(`${w.panggilan} (#${w.nomorUrut} ${w.jabatan}) kerja ${w.pekerjaan} di ${petakSekarang} ("${catatan}") → +${totalPoin} Poin (Sisa kerja: ${w.sisaKerja}x).`, w);
+      simpanState();
+      renderSemua();
+    }
+
+    function terapkanEfekItem(penerima, itemLabel) {
+      if (itemLabel.includes("Mi Aceh")) {
+        penerima.energi = Math.min(100, penerima.energi + 30);
+      } else if (itemLabel.includes("Rendang")) {
+        penerima.bonusKerjaNext = (penerima.bonusKerjaNext || 0) + 35;
+      } else if (itemLabel.includes("BPK")) {
+        penerima.energi = Math.min(100, penerima.energi + 25);
+        penerima.bonusKerjaNext = (penerima.bonusKerjaNext || 0) + 25;
+      } else if (itemLabel.includes("Baju")) {
+        penerima.koleksi.push("Outfit Kota");
+      } else if (itemLabel.includes("Paket")) {
+        penerima.energi = Math.min(100, penerima.energi + 15);
+      }
+    }
+
+    function kirimPesananPoin() {
+      const pengirim = getWargaAktif();
+      if (!pengirim) {
+        alert("Pilih atau daftar karakter warga terlebih dahulu.");
+        return;
+      }
+
+      const targetId = document.getElementById("selectTargetWarga").value;
+      const itemLabel = document.getElementById("selectItemKhas").value;
+      const nominal = parseInt(document.getElementById("inputNominalKirim").value, 10);
+
+      if (!targetId || targetId === pengirim.id) {
+        alert("Pilih warga lain sebagai tujuan transaksi/pesanan.");
+        return;
+      }
+      if (isNaN(nominal) || nominal < 10 || nominal > 2000) {
+        alert("Nominal transaksi harus antara 10 sampai 2.000 Poin.");
+        return;
+      }
+      if (pengirim.poin < nominal) {
+        alert("Poin karakter aktif tidak cukup.");
+        return;
+      }
+
+      const penerima = state.warga.find((x) => x.id === targetId);
+      if (!penerima) return;
+
+      pengirim.poin -= nominal;
+      penerima.poin += nominal;
+      terapkanEfekItem(penerima, itemLabel);
+
+      tambahLog(`${pengirim.panggilan} memesan "${itemLabel}" ke ${penerima.panggilan} (${penerima.pekerjaan}) sebesar ${nominal} Poin.`, pengirim);
+      simpanState();
+      renderSemua();
+    }
+
+    function patunganProyek() {
+      const w = getWargaAktif();
+      if (!w) {
+        alert("Pilih atau daftar karakter warga terlebih dahulu.");
+        return;
+      }
+
+      const jumlah = parseInt(document.getElementById("inputPatungan").value, 10);
+      if (isNaN(jumlah) || jumlah < 50 || jumlah > 10000) {
+        alert("Patungan per aksi antara 50 sampai 10.000 Poin.");
+        return;
+      }
+      if (w.poin < jumlah) {
+        alert("Poin karakter aktif tidak cukup untuk patungan.");
+        return;
+      }
+
+      w.poin -= jumlah;
+      state.proyekPoin += jumlah;
+
+      tambahLog(`${w.panggilan} (#${w.nomorUrut}) menyumbang ${jumlah} Poin untuk Proyek Stasiun Kota.`, w);
+      simpanState();
+      renderSemua();
+    }
+
+    function kelolaPetak(sektor, index) {
+      const w = getWargaAktif();
+      if (!w) {
+        alert("Daftar atau pilih KTP warga dulu untuk mengelola petak.");
+        bukaPanel("ktp");
+        return;
+      }
+
+      const p = state.petak[sektor][index];
+      w.sektor = sektor;
+      w.petakIdx = index;
+
+      if (!p.pemilikId) {
+        const biaya = 150;
+        if (w.poin < biaya) {
+          alert(`Butuh ${biaya} Poin untuk mengklaim & mengelola petak "${p.nama}".`);
+          return;
+        }
+        w.poin -= biaya;
+        p.pemilikId = w.id;
+        p.pemilikPanggilan = w.panggilan;
+        p.fasilitas = `Usaha/Pos (${w.pekerjaan})`;
+        tambahLog(`${w.panggilan} bergerak ke "${p.nama}" & mengklaim petak di ${NAMA_SEKTOR[sektor]} (${biaya} Poin).`, w);
+      } else {
+        const bonusKunjungan = 25;
+        w.poin += bonusKunjungan;
+        tambahLog(`${w.panggilan} bergerak mengunjungi "${p.nama}" milik ${p.pemilikPanggilan} di ${NAMA_SEKTOR[sektor]} (+${bonusKunjungan} Poin).`, w);
+      }
+
+      simpanState();
+      renderSemua();
+    }
+
+    function pilihSektor(s) {
+      state.sektorAktif = s;
+      const w = getWargaAktif();
+      if (w) {
+        w.sektor = s;
+        w.petakIdx = 0;
+        tambahLog(`${w.panggilan} berpindah ke ${NAMA_SEKTOR[s]}.`, w);
+      }
+      simpanState();
+      renderSemua();
+    }
+
+    function bukaPanel(namaPanel) {
+      ["kerja", "ktp", "proyek", "sektor"].forEach((p) => {
+        document.getElementById("subpanel-" + p).classList.toggle("hidden", p !== namaPanel);
+        const tabEl = document.getElementById("tab-" + p);
+        if (tabEl) tabEl.classList.toggle("active", p === namaPanel);
+        const menuEl = document.getElementById("menu-" + p);
+        if (menuEl) menuEl.classList.toggle("active", p === namaPanel);
+      });
+    }
+
+    function updateInfoPekerjaan() {
+      const p = document.getElementById("selectPekerjaan").value;
+      document.getElementById("infoKhususPekerjaan").textContent = INFO_PEKERJAAN[p] || "";
+    }
+
+    function majuHari() {
+      state.day += 1;
+      state.warga.forEach((w) => {
+        let gajiHarian = 100;
+        if (w.jabatan === "Presiden") gajiHarian = 250;
+        else if (w.jabatan === "Perdana Menteri") gajiHarian = 180;
+        else if (w.jabatan === "Gubernur") gajiHarian = 150;
+        w.poin += gajiHarian;
+        w.energi = Math.min(100, (w.energi ?? 100) + 35);
+        w.sisaKerja = KUOTA_KERJA_HARIAN;
+      });
+      const ev = getEventHariIni();
+      tambahLog(`Memasuki DAY ${state.day}! Event: "${ev.judul}" (+${ev.bonusKerja} Poin kerja). Kuota kerja & energi direset.`);
+      simpanState();
+      renderSemua();
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `indonesia-merdeka-day-${state.day}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const dataMasuk = JSON.parse(e.target.result);
+          if (!Array.isArray(dataMasuk.warga) || typeof dataMasuk.proyekPoin !== "number") {
+            alert("Format file JSON tidak valid untuk game ini.");
+            return;
+          }
+          state = { ...state, ...dataMasuk };
+          initPetakDefault();
+          if (!state.aktifWargaId && state.warga.length > 0) {
+            state.aktifWargaId = state.warga[0].id;
+          }
+          tambahLog(`Data kota berhasil di-import (Day ${state.day}, ${state.warga.length} warga).`);
+          simpanState();
+          renderSemua();
+        } catch (err) {
+          alert("Gagal membaca file JSON.");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    }
+
+    function resetDataKonfirmasi() {
+      if (confirm("Yakin ingin menghapus seluruh data warga & progres kota?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem("simulasi_kota_indonesia_merdeka_v2");
+        state = {
+          day: 1,
+          sektorAktif: 1,
+          aktifWargaId: null,
+          proyekPoin: 0,
+          warga: [],
+          petak: {},
+          log: []
+        };
+        initPetakDefault();
+        tambahLog("Data kota direset ke awal (Day 1).");
+        simpanState();
+        renderSemua();
+      }
+    }
+
+    function renderSemua() {
+      const aktif = getWargaAktif();
+      const ev = getEventHariIni();
+
+      document.getElementById("labelDay").textContent = `DAY ${state.day}`;
+      document.getElementById("jumlahWargaTampil").textContent = `WARGA: ${state.warga.length}`;
+      document.getElementById("saldoWargaAktif").innerHTML =
+        `💰 ${aktif ? aktif.poin.toLocaleString("id-ID") : 0} Poin<br/><span style="font-size:11px; font-weight:600;">⚡ Energi: ${aktif ? aktif.energi : 0}/100</span>`;
+
+      document.getElementById("teksEventHarian").textContent =
+        `📣 Event Hari Ini: ${ev.judul} (+${ev.bonusKerja} Poin${ev.targetKerja ? " untuk " + ev.targetKerja : " kerja"})`;
+
+      document.getElementById("sisaKuotaKerja").textContent =
+        `Kuota Kerja: ${aktif ? aktif.sisaKerja : KUOTA_KERJA_HARIAN}/${KUOTA_KERJA_HARIAN}x`;
+
+      document.getElementById("teksSambutan").textContent = aktif
+        ? `Halo ${aktif.panggilan} (Anggota Ke-${aktif.nomorUrut} • ${aktif.jabatan}) — Simulasi Kota INDONESIA MERDEKA`
+        : "Selamat datang di Simulasi Kota INDONESIA MERDEKA! Terbitkan KTP pertama untuk memulai.";
+
+      document.getElementById("infoAktifKontrol").innerHTML = aktif
+        ? `${renderAvatarHTML(aktif, "sm")} Kontrol: ${escapeHtml(aktif.panggilan)} (#${aktif.nomorUrut} • ${escapeHtml(aktif.pekerjaan)})`
+        : "Karakter Aktif: Belum ada";
+
+      const persen = Math.min(100, Math.round((state.proyekPoin / TARGET_PROYEK) * 100));
+      document.getElementById("teksProgresProyek").textContent =
+        `${state.proyekPoin.toLocaleString("id-ID")} Poin / ${TARGET_PROYEK.toLocaleString("id-ID")} Poin`;
+      document.getElementById("persenProyek").textContent = `${persen}%`;
+      document.getElementById("barProyek").style.width = `${persen}%`;
+
+      const msContainer = document.getElementById("daftarMilestone");
+      msContainer.innerHTML = "";
+      MILESTONE_PROYEK.forEach((m) => {
+        const tercapai = state.proyekPoin >= m.poin;
+        const box = document.createElement("div");
+        box.className = "milestone-box" + (tercapai ? " done" : "");
+        box.innerHTML = `<strong>${tercapai ? "✅ " : "⏳ "}${m.nama}</strong>`;
+        msContainer.appendChild(box);
+      });
+
+      document.querySelectorAll('[data-sektor]').forEach((btn) => {
+        btn.classList.toggle("active", parseInt(btn.dataset.sektor, 10) === state.sektorAktif);
+      });
+      document.getElementById("judulSektorAktif").textContent = `📍 ${NAMA_SEKTOR[state.sektorAktif]}`;
+
+      const gridPetak = document.getElementById("gridPetak");
+      gridPetak.innerHTML = "";
+      (state.petak[state.sektorAktif] || []).forEach((p, idx) => {
+        const div = document.createElement("div");
+        div.className = "petak" + (p.pemilikId ? " terisi" : "");
+
+        const wargaDiPetak = state.warga.filter(
+          (w) => (w.sektor || 1) === state.sektorAktif && (w.petakIdx || 0) === idx
+        );
+
+        const chipsHTML = wargaDiPetak.length
+          ? `<div class="avatar-chip-list">
+              ${wargaDiPetak
+                .map(
+                  (w) =>
+                    `<span class="avatar-chip ${aktif && w.id === aktif.id ? "aktif-chip" : ""}">
+                      ${renderAvatarHTML(w, "sm")}
+                      <span>${escapeHtml(w.panggilan)}</span>
+                    </span>`
+                )
+                .join("")}
+            </div>`
+          : "";
+
+        div.innerHTML = `
+          <div class="petak-title">${escapeHtml(p.nama)}</div>
+          <div class="petak-meta">${p.pemilikId ? `Dikelola: ${escapeHtml(p.pemilikPanggilan)}` : "Kosong • Klaim 150 Poin"}</div>
+          <div class="petak-meta">${escapeHtml(p.fasilitas)}</div>
+          ${chipsHTML}
+        `;
+        div.onclick = () => kelolaPetak(state.sektorAktif, idx);
+        gridPetak.appendChild(div);
+      });
+
+      if (aktif) {
+        document.getElementById("selectPekerjaan").value = aktif.pekerjaan;
+      }
+      updateInfoPekerjaan();
+
+      const selectTarget = document.getElementById("selectTargetWarga");
+      selectTarget.innerHTML = "";
+      state.warga.forEach((w) => {
+        if (!aktif || w.id !== aktif.id) {
+          const opt = document.createElement("option");
+          opt.value = w.id;
+          opt.textContent = `#${w.nomorUrut} ${w.panggilan} (${w.pekerjaan})`;
+          selectTarget.appendChild(opt);
+        }
+      });
+
+      const ktpBox = document.getElementById("tampilanKtpAktif");
+      if (aktif) {
+        ktpBox.innerHTML = `
+          <div class="ktp-card">
+            <div class="ktp-header">
+              <div class="ktp-negara">KTP MASYARAKAT "INDONESIA MERDEKA"</div>
+              <span class="badge" style="background:var(--merah); color:#fff;">ANGGOTA KE-${aktif.nomorUrut}</span>
+            </div>
+            <div class="ktp-body">
+              ${renderAvatarHTML(aktif, "lg")}
+              <div class="ktp-rows">
+                <div>
+                  <div class="ktp-label">Nama</div>
+                  <div class="ktp-val">${escapeHtml(aktif.nama)}</div>
+                </div>
+                <div>
+                  <div class="ktp-label">Nama Panggilan</div>
+                  <div class="ktp-val">${escapeHtml(aktif.panggilan)}</div>
+                </div>
+                <div>
+                  <div class="ktp-label">Jabatan</div>
+                  <div class="ktp-val">${escapeHtml(aktif.jabatan)}</div>
+                </div>
+                <div>
+                  <div class="ktp-label">Pekerjaan & Bonus</div>
+                  <div class="ktp-val">${escapeHtml(aktif.pekerjaan)}${aktif.bonusKerjaNext > 0 ? ` (+${aktif.bonusKerjaNext} Bonus)` : ""}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        ktpBox.innerHTML = `<div class="hint">Belum ada KTP aktif. Isi form di atas untuk menerbitkan KTP pertama.</div>`;
+      }
+
+      const listWarga = document.getElementById("daftarWargaList");
+      listWarga.innerHTML = "";
+      if (state.warga.length === 0) {
+        listWarga.innerHTML = `<div class="hint">Belum ada warga terdaftar.</div>`;
+      } else {
+        state.warga.forEach((w) => {
+          const item = document.createElement("div");
+          item.className = "warga-item" + (aktif && w.id === aktif.id ? " aktif" : "");
+          item.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px;">
+              ${renderAvatarHTML(w, "md")}
+              <div>
+                <strong>#${w.nomorUrut} ${escapeHtml(w.panggilan)}</strong> (${escapeHtml(w.nama)}) • <span style="color:var(--merah); font-weight:700;">${escapeHtml(w.jabatan)}</span>
+                <div style="font-size:11px; color:var(--muted);">Kerja: ${escapeHtml(w.pekerjaan)} • 💰 ${w.poin.toLocaleString("id-ID")} Poin • ⚡ ${w.energi}/100</div>
+              </div>
+            </div>
+            <button class="btn ${aktif && w.id === aktif.id ? "btn-hijau" : "btn-outline"}" style="padding:6px 10px; font-size:11px;" onclick="pilihKontrolWarga('${w.id}')">
+              ${aktif && w.id === aktif.id ? "Sedang Dikontrol" : "Kontrol Karakter"}
+            </button>
+          `;
+          listWarga.appendChild(item);
+        });
+      }
+
+      const logBox = document.getElementById("logAktivitas");
+      logBox.innerHTML = "";
+      state.log.forEach((entry) => {
+        const d = document.createElement("div");
+        d.className = "log-item";
+        if (typeof entry === "string") {
+          d.textContent = entry;
+        } else {
+          const avatarHtml = entry.wargaSnapshot ? renderAvatarHTML(entry.wargaSnapshot, "sm") : "🏙️";
+          d.innerHTML = `${avatarHtml}<span><strong>[${escapeHtml(entry.waktu)}]</strong> ${escapeHtml(entry.teks)}</span>`;
+        }
+        logBox.appendChild(d);
+      });
+    }
+
+    muatState();
+    renderSemua();
+  </script>
 </body>
 </html>
+
