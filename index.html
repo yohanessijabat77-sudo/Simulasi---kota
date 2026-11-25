@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulasi Kota – Kerangka Tampilan & Peta</title>
+  <style>
+    :root {
+      --bg-outer: #111827;
+      --bg-app: #ecfdf5;
+      --road: #e5e7eb;
+      --road-line: #ffffff;
+      --card-dark: #5c1922;
+      --card-green: #144536;
+      --accent-yellow: #facc15;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-outer);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* Container Utama Ala Mobile */
+    .app-shell {
+      width: 100%;
+      max-width: 430px;
+      background-color: var(--bg-app);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      background-image: 
+        linear-gradient(to right, var(--road) 24px, transparent 24px),
+        linear-gradient(to bottom, var(--road) 24px, transparent 24px);
+      background-size: 140px 140px;
+    }
+
+    /* Ticker Siaran Kota */
+    .news-ticker {
+      background-color: #7f1d1d;
+      color: #ffffff;
+      font-size: 12px;
+      padding: 8px 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .dot-live {
+      width: 8px;
+      height: 8px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .ticker-text {
+      display: inline-block;
+      animation: marquee 18s linear infinite;
+    }
+
+    @keyframes marquee {
+      0% { transform: translateX(10%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* Area Peta & HUD */
+    .map-viewport {
+      flex: 1;
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      position: relative;
+    }
+
+    .hud-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 5;
+    }
+
+    /* Kartu Status Hari & Warga */
+    .card-status {
+      background: linear-gradient(135deg, #691b25, #471118);
+      color: white;
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+    }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .badge-day {
+      background-color: var(--accent-yellow);
+      color: #1f2937;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .status-active {
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-status h2 {
+      font-size: 22px;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .card-status p {
+      font-size: 11px;
+      color: #fca5a5;
+    }
+
+    /* Kartu Proyek Stasiun Kota */
+    .card-project {
+      background: linear-gradient(135deg, #1b4d3e, #0f3328);
+      color: white;
+      border-radius: 16px;
+      padding: 12px 14px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+    }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .project-title {
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-patungan {
+      background-color: var(--accent-yellow);
+      color: #111827;
+      border: none;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .btn-patungan:active {
+      transform: scale(0.94);
+    }
+
+    .project-stats {
+      font-size: 12px;
+      color: #d1fae5;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background-color: rgba(255,255,255,0.2);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 15%;
+      background-color: var(--accent-yellow);
+      transition: width 0.3s ease;
+    }
+
+    /* Landmark Peta (Balai Kota) */
+    .map-landmark {
+      position: absolute;
+      bottom: 35px;
+      left: 38%;
+      transform: translateX(-50%);
+      background-color: #d1fae5;
+      border: 2px dashed #6ee7b7;
+      color: #065f46;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    /* Menu Tombol Kanan */
+    .hud-right {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 5;
+    }
+
+    .side-btn {
+      width: 66px;
+      height: 66px;
+      background-color: #ffffff;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      transition: transform 0.1s, background-color 0.2s;
+    }
+
+    .side-btn:active {
+      transform: scale(0.93);
+      background-color: #fef9c3;
+    }
+
+    .side-btn-icon {
+      font-size: 20px;
+    }
+
+    .side-btn-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: #1f2937;
+    }
+
+    /* Panel Bawah (Chat & Profil Warga) */
+    .bottom-dock {
+      background-color: #ffffff;
+      border-top: 1px solid #e5e7eb;
+      padding: 10px 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .chat-preview-bar {
+      background-color: #f3f4f6;
+      border-radius: 12px;
+      padding: 9px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 12px;
+      color: #4b5563;
+    }
+
+    .chat-preview-bar strong {
+      color: #111827;
+      font-size: 11px;
+    }
+
+    .player-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .player-pill {
+      flex: 1;
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #111827;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .timer-pill {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ktp-mini-btn {
+      background-color: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Toast Notifikasi Mengambang */
+    .toast {
+      position: absolute;
+      top: 44px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background-color: #111827;
+      color: #facc15;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 50;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Modal / Popup Interaktif */
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background-color: rgba(17, 24, 39, 0.6);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 40;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-sheet {
+      width: 100%;
+      background-color: #ffffff;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      padding: 18px;
+      animation: slideUp 0.22s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-close {
+      background: #f3f4f6;
+      border: none;
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Styling Kartu E-KTP */
+    .ektp-card {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: white;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .ektp-card h4 {
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.3);
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    /* Styling Panel Global Chat */
+    .chat-messages {
+      height: 180px;
+      overflow-y: auto;
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .chat-bubble {
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+
+    .chat-bubble.self {
+      background-color: #ecfdf5;
+      border-color: #a7f3d0;
+      align-self: flex-end;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .chat-input-row input {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .chat-input-row button {
+      background-color: #059669;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Toast Notifikasi -->
+  <div id="toast" class="toast">+50 Poin Kerja!</div>
+
+  <!-- Siaran Kota -->
+  <div class="news-ticker">
+    <span class="dot-live"></span>
+    <span class="ticker-text" id="tickerText">
+      KOTA SIARAN — Selamat datang di Simulasi Kota! Geser peta atau klik tombol KERJA untuk mengumpulkan poin pembangunan.
+    </span>
+  </div>
+
+  <!-- Viewport Peta & HUD -->
+  <div class="map-viewport">
+    <div class="hud-left">
+      <!-- Kartu Status -->
+      <div class="card-status">
+        <div class="badge-row">
+          <span class="badge-day" id="dayBadge">DAY 1</span>
+          <span class="status-active">● AKTIF</span>
+        </div>
+        <h2>WARGA: <span id="citizenCount">5</span></h2>
+        <p>Diperbarui otomatis • Sektor 1–4 terbuka</p>
+      </div>
+
+      <!-- Kartu Proyek Stasiun Kota -->
+      <div class="card-project">
+        <div class="project-header">
+          <div class="project-title">🚆 Proyek Stasiun Kota</div>
+          <button class="btn-patungan" onclick="openPatunganModal()">PATUNGAN &gt;</button>
+        </div>
+        <div class="project-stats" id="projectStats">
+          7.500 Poin / 50.000 Poin (15%)
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="projectProgress"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Landmark Peta -->
+    <div class="map-landmark">🏛️ Balai Kota</div>
+
+    <!-- Tombol Aksi Kanan -->
+    <div class="hud-right">
+      <button class="side-btn" onclick="doWork()">
+        <span class="side-btn-icon">💼</span>
+        <span class="side-btn-label">KERJA</span>
+      </button>
+
+      <button class="side-btn" onclick="openKtpModal()">
+        <span class="side-btn-icon">🪪</span>
+        <span class="side-btn-label">E-KTP</span>
+      </button>
+
+      <button class="side-btn" onclick="showToast('Sektor 1–4 sudah terbuka!')">
+        <span class="side-btn-icon">🗺️</span>
+        <span class="side-btn-label">SEKTOR</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Panel Bawah -->
+  <div class="bottom-dock">
+    <div class="chat-preview-bar" onclick="openChatModal()">
+      <span id="lastChatPreview">💬 Global Chat — ketuk untuk membuka obrolan</span>
+      <strong>CHAT</strong>
+    </div>
+
+    <div class="player-bar">
+      <div class="player-pill">
+        <span><strong>Yohan</strong> • <span id="playerStatusShort">Warga Baru</span></span>
+        <strong><span id="playerPoints">150</span> Poin</strong>
+      </div>
+      <div class="timer-pill">
+        ⏱️ <span id="gameTimer">01:45</span>
+      </div>
+      <button class="ktp-mini-btn" onclick="openKtpModal()">🪪 KTP</button>
+    </div>
+  </div>
+
+  <!-- MODAL 1: E-KTP / KTP -->
+  <div id="modalKtp" class="modal-backdrop" onclick="closeModalOnBackdrop(event, 'modalKtp')">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>Identitas Warga (E-KTP)</h3>
+        <button class="modal-close" onclick="closeModal('modalKtp')">Tutup</button>
+      </div>
+      <div class="ektp-card">
+        <h4>KARTU TANDA PENDUDUK KOTA</h4>
+        <div><strong>NIK Kota:</strong> 2026-0001-YHN</div>
+        <div><strong>Nama:</strong> Yohan</div>
+        <div><strong>Status Warga:</strong> <span id="ktpStatus">Warga Baru</span></div>
+        <div><strong>Domisili:</strong> Sektor 1 (Pusat Balai Kota)</div>
+        <div><strong>Total Kontribusi Proyek:</strong> <span id="ktpContributed">0</span> Poin</div>
+        <div><strong>Saldo Poin Saat Ini:</strong> <span id="ktpPoints">150</span> Poin</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: PATUNGAN PROYEK STASIUN -->
+  <div id="modalPatungan" class="modal-backdrop" onclick="closeModalOnBackdrop(event, 'modalPatungan')">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>🚆 Patungan Proyek Stasiun Kota</h3>
+        <button class="modal-close" onclick="closeModal('modalPatungan')">Tutup</button>
+      </div>
+      <p style="font-size: 12px; color: #4b5563; margin-bottom: 12px;">
+        Sumbangkan poin kerjamu untuk mempercepat pembangunan Stasiun Kota!
+      </p>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="donateProject(50)" style="flex:1; padding:10px; border:none; border-radius:10px; background:#059669; color:white; font-weight:700; cursor:pointer;">
+          +50 Poin
+        </button>
+        <button onclick="donateProject(100)" style="flex:1; padding:10px; border:none; border-radius:10px; background:#0284c7; color:white; font-weight:700; cursor:pointer;">
+          +100 Poin
+        </button>
+        <button onclick="donateProject('all')" style="flex:1; padding:10px; border:none; border-radius:10px; background:#d97706; color:white; font-weight:700; cursor:pointer;">
+          Semua Poin
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: GLOBAL CHAT -->
+  <div id="modalChat" class="modal-backdrop" onclick="closeModalOnBackdrop(event, 'modalChat')">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>💬 Global Chat Warga Kota</h3>
+        <button class="modal-close" onclick="closeModal('modalChat')">Tutup</button>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-bubble"><strong>Budi (Sektor 2):</strong> Ayo patungan biar stasiun cepat jadi!</div>
+        <div class="chat-bubble"><strong>Sari (Warga Tetap):</strong> Baru selesai shift kerja, lumayan dapat +50 poin.</div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Ketik pesan ke warga kota..." onkeypress="if(event.key==='Enter') sendChat()" />
+        <button onclick="sendChat()">Kirim</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // State Utama Game
+  const state = {
+    day: 1,
+    citizens: 5,
+    points: 150,
+    contributed: 0,
+    projectCurrent: 7500,
+    projectTarget: 50000,
+    secondsLeft: 105 // 01:45
+  };
+
+  // Format angka ribuan dengan titik (contoh: 7.500)
+  function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  // Hitung status warga otomatis berdasarkan poin/kontribusi
+  function getCitizenRank() {
+    const totalScore = state.points + state.contributed;
+    if (totalScore >= 500) return "Donatur Utama";
+    if (totalScore >= 250) return "Warga Aktif";
+    return "Warga Baru";
+  }
+
+  // Perbarui seluruh tampilan UI
+  function updateUI() {
+    document.getElementById("dayBadge").textContent = `DAY ${state.day}`;
+    document.getElementById("citizenCount").textContent = state.citizens;
+    document.getElementById("playerPoints").textContent = formatNumber(state.points);
+    document.getElementById("playerStatusShort").textContent = getCitizenRank();
+
+    // Update KTP Modal
+    document.getElementById("ktpStatus").textContent = getCitizenRank();
+    document.getElementById("ktpContributed").textContent = formatNumber(state.contributed);
+    document.getElementById("ktpPoints").textContent = formatNumber(state.points);
+
+    // Update Proyek Stasiun Kota
+    const percent = Math.min(100, ((state.projectCurrent / state.projectTarget) * 100));
+    const percentDisplay = percent % 1 === 0 ? percent : percent.toFixed(1);
+    document.getElementById("projectStats").textContent = 
+      `${formatNumber(state.projectCurrent)} Poin / ${formatNumber(state.projectTarget)} Poin (${percentDisplay}%)`;
+    document.getElementById("projectProgress").style.width = `${percent}%`;
+  }
+
+  // Notifikasi Toast
+  let toastTimeout;
+  function showToast(msg) {
+    const toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toast.classList.remove("show"), 2000);
+  }
+
+  // 1. Fungsi Tombol KERJA
+  function doWork() {
+    const earned = 50;
+    state.points += earned;
+    state.secondsLeft += 10; // Bonus waktu 10 detik tiap kerja
+    updateTimerDisplay();
+    updateUI();
+    showToast(`💼 Kerja selesai! +${earned} Poin & +10 detik`);
+  }
+
+  // 2. Fungsi Tombol E-KTP / KTP
+  function openKtpModal() {
+    updateUI();
+    document.getElementById("modalKtp").classList.add("active");
+  }
+
+  // 3. Fungsi Tombol PATUNGAN >
+  function openPatunganModal() {
+    document.getElementById("modalPatungan").classList.add("active");
+  }
+
+  function donateProject(amount) {
+    const value = amount === "all" ? state.points : amount;
+    if (value <= 0 || state.points < value) {
+      showToast("❌ Poin tidak cukup! Klik KERJA dulu.");
+      return;
+    }
+
+    state.points -= value;
+    state.contributed += value;
+    state.projectCurrent = Math.min(state.projectTarget, state.projectCurrent + value);
+    updateUI();
+    closeModal("modalPatungan");
+    showToast(`🚆 Berhasil patungan ${formatNumber(value)} Poin!`);
+  }
+
+  // 4. Fungsi Panel GLOBAL CHAT
+  function openChatModal() {
+    document.getElementById("modalChat").classList.add("active");
+  }
+
+  function sendChat() {
+    const input = document.getElementById("chatInput");
+    const text = input.value.trim();
+    if (!text) return;
+
+    const chatBox = document.getElementById("chatMessages");
+    const bubble = document.createElement("div");
+    bubble.className = "chat-bubble self";
+    bubble.innerHTML = `<strong>Yohan (${getCitizenRank()}):</strong> ${text}`;
+    chatBox.appendChild(bubble);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    document.getElementById("lastChatPreview").textContent = `💬 Yohan: ${text}`;
+    input.value = "";
+  }
+
+  // Tutup Modal
+  function closeModal(id) {
+    document.getElementById(id).classList.remove("active");
+  }
+
+  function closeModalOnBackdrop(e, id) {
+    if (e.target.id === id) closeModal(id);
+  }
+
+  // Timer Siklus Hari Otomatis
+  function updateTimerDisplay() {
+    const mins = String(Math.floor(state.secondsLeft / 60)).padStart(2, "0");
+    const secs = String(state.secondsLeft % 60).padStart(2, "0");
+    document.getElementById("gameTimer").textContent = `${mins}:${secs}`;
+  }
+
+  setInterval(() => {
+    if (state.secondsLeft > 0) {
+      state.secondsLeft--;
+    } else {
+      // Pergantian Hari Baru
+      state.day++;
+      state.citizens += 2;
+      state.secondsLeft = 105;
+      showToast(`🌅 Hari ke-${state.day}! +2 Warga baru datang.`);
+    }
+    updateTimerDisplay();
+    updateUI();
+  }, 1000);
+
+  // Inisialisasi awal
+  updateUI();
+</script>
+
+</body>
+</html>
