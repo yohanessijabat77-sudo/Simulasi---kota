@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Simulasi Kota: INDONESIA MERDEKA (HD Edition)</title>
+  <style>
+    :root {
+      --merah: #d90429;
+      --merah-gelap: #8d0801;
+      --putih: #ffffff;
+      --emas: #f59e0b;
+      --hijau: #10b981;
+      --biru: #2563eb;
+      --gelap: #0b1120;
+      --panel: rgba(15, 23, 42, 0.92);
+      --border: rgba(255, 255, 255, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: #070d19;
+      color: #f8fafc;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* GERBANG LOGIN & REGISTRASI E-KTP */
+    #authGate {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(217, 4, 41, 0.35), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.25), transparent 50%),
+        linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #450a0a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 450px;
+      background: rgba(15, 23, 42, 0.94);
+      border: 2px solid var(--emas);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+    }
+
+    .flag-bar {
+      height: 8px;
+      border-radius: 6px;
+      background: linear-gradient(to bottom, var(--merah) 50%, var(--putih) 50%);
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(217, 4, 41, 0.5);
+    }
+
+    .auth-title {
+      text-align: center;
+      font-size: 1.35rem;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .auth-subtitle {
+      text-align: center;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      margin-top: 4px;
+      margin-bottom: 16px;
+    }
+
+    .tab-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .tab-btn {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #1e293b;
+      color: #94a3b8;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(90deg, var(--merah), #ef4444);
+      color: #fff;
+      border-color: #fca5a5;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #090e1a;
+      color: #fff;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--emas);
+      box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
+    }
+
+    .rank-info {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 0.74rem;
+      color: #fde68a;
+      margin-bottom: 14px;
+      line-height: 1.45;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(90deg, var(--merah), #ef4444);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(217, 4, 41, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    /* PERINGATAN ROTASI LANDSCAPE */
+    #rotateOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background: rgba(11, 17, 32, 0.98);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    @media screen and (orientation: portrait) and (max-width: 900px) {
+      body.logged-in #rotateOverlay {
+        display: flex;
+      }
+    }
+
+    .phone-icon {
+      width: 56px;
+      height: 92px;
+      border: 3px solid var(--emas);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      animation: rotatePhone 1.8s infinite ease-in-out;
+    }
+
+    @keyframes rotatePhone {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(-90deg); }
+    }
+
+    /* HUD UTAMA GAME */
+    #gameApp {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .top-hud {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      z-index: 120;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 6px 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+    }
+
+    .hud-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mini-flag {
+      width: 26px;
+      height: 17px;
+      border-radius: 3px;
+      background: linear-gradient(to bottom, var(--merah) 50%, var(--putih) 50%);
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    }
+
+    .hud-stats {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 0.76rem;
+    }
+
+    .stat-pill {
+      background: rgba(30, 41, 59, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 4px 9px;
+      border-radius: 9px;
+      font-weight: 700;
+    }
+
+    .hud-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .hud-btn {
+      padding: 5px 9px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: #1e293b;
+      color: #fff;
+      font-size: 0.73rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .hud-btn.active {
+      background: var(--hijau);
+      color: #052e16;
+      border-color: #6ee7b7;
+    }
+
+    /* VIEWPORT & PETA PANNABLE HD (2400x1500) */
+    #mapViewport {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      background: #0d2b1d;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #mapViewport:active {
+      cursor: grabbing;
+    }
+
+    #cityWorld {
+      width: 2400px;
+      height: 1500px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-color: #2d7a47;
+      background-image:
+        radial-gradient(circle at 22% 20%, rgba(134, 239, 172, 0.22) 0%, transparent 32%),
+        radial-gradient(circle at 75% 35%, rgba(52, 211, 153, 0.18) 0%, transparent 38%),
+        radial-gradient(circle at 45% 80%, rgba(16, 185, 129, 0.2) 0%, transparent 40%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 2px, transparent 2px, transparent 14px),
+        linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px, 60px 60px, 60px 60px;
+      transform-origin: 0 0;
+      will-change: transform;
+    }
+
+    /* SUNGAI NUSANTARA HD BERKILAU */
+    .river-h {
+      position: absolute;
+      left: 0;
+      top: 1180px;
+      width: 100%;
+      height: 115px;
+      background: linear-gradient(180deg, #0284c7 0%, #0369a1 50%, #075985 100%);
+      border-top: 8px solid #d6c59f;
+      border-bottom: 8px solid #d6c59f;
+      box-shadow: inset 0 8px 18px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+
+    .river-wave {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.14) 0px,
+        rgba(255,255,255,0.14) 40px,
+        transparent 40px,
+        transparent 95px
+      );
+      animation: waterFlow 6s linear infinite;
+    }
+
+    @keyframes waterFlow {
+      from { transform: translateX(0); }
+      to { transform: translateX(95px); }
+    }
+
+    /* JEMBATAN KAYU & BAJA MERAH PUTIH */
+    .bridge {
+      position: absolute;
+      top: -12px;
+      width: 110px;
+      height: 139px;
+      background: linear-gradient(90deg, #475569, #64748b, #475569);
+      border-left: 6px solid var(--merah);
+      border-right: 6px solid var(--putih);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      z-index: 5;
+    }
+
+    /* JALAN RAYA ASPAL HD DENGAN TROTOAR & ZEBRA CROSS */
+    .road-h {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 88px;
+      background: linear-gradient(180deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+      border-top: 7px solid #cbd5e1;
+      border-bottom: 7px solid #cbd5e1;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+    }
+
+    .road-h::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: repeating-linear-gradient(90deg, #facc15 0 32px, transparent 32px 64px);
+      transform: translateY(-50%);
+    }
+
+    .road-v {
+      position: absolute;
+      top: 0;
+      height: 1180px;
+      width: 88px;
+      background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+      border-left: 7px solid #cbd5e1;
+      border-right: 7px solid #cbd5e1;
+      box-shadow: 6px 0 14px rgba(0,0,0,0.35);
+    }
+
+    .road-v::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: repeating-linear-gradient(180deg, #facc15 0 32px, transparent 32px 64px);
+      transform: translateX(-50%);
+    }
+
+    /* ALUN-ALUN & MONUMEN TUGU MERDEKA HD */
+    .monument-plaza {
+      position: absolute;
+      left: 820px;
+      top: 520px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #f1f5f9 0%, #cbd5e1 65%, #94a3b8 100%);
+      border: 8px solid var(--merah);
+      box-shadow: 0 18px 36px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      z-index: 8;
+    }
+
+    /* DEKORASI LINGKUNGAN HD (POHON, MOBIL PATROLI) */
+    .tree-hd {
+      position: absolute;
+      width: 46px;
+      height: 46px;
+      pointer-events: none;
+      z-index: 12;
+      filter: drop-shadow(0 6px 6px rgba(0,0,0,0.45));
+    }
+
+    .city-car {
+      position: absolute;
+      width: 54px;
+      height: 28px;
+      z-index: 25;
+      pointer-events: none;
+      filter: drop-shadow(0 5px 6px rgba(0,0,0,0.55));
+      animation: driveRoadH 18s linear infinite;
+    }
+
+    @keyframes driveRoadH {
+      0% { left: -80px; }
+      100% { left: 2460px; }
+    }
+
+    /* KARTU BANGUNAN & USAHA HD */
+    .building {
+      position: absolute;
+      width: 215px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(30, 41, 59, 0.96) 100%);
+      border: 2px solid rgba(255, 255, 255, 0.32);
+      border-radius: 18px;
+      padding: 12px;
+      text-align: center;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      z-index: 15;
+    }
+
+    .building:hover {
+      transform: translateY(-4px) scale(1.02);
+      border-color: var(--emas);
+      box-shadow: 0 20px 38px rgba(245, 158, 11, 0.35);
+    }
+
+    .building-badge {
+      position: absolute;
+      top: -10px;
+      right: 12px;
+      background: var(--emas);
+      color: #0f172a;
+      font-size: 0.62rem;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 99px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+    }
+
+    .building-svg {
+      width: 78px;
+      height: 78px;
+      margin: 0 auto 6px;
+      display: block;
+      filter: drop-shadow(0 5px 8px rgba(0,0,0,0.45));
+    }
+
+    .building-name {
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .building-sub {
+      font-size: 0.71rem;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      height: 9px;
+      background: #0f172a;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 7px;
+      border: 1px solid #475569;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--emas), var(--hijau));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* AVATAR WARGA HD */
+    .citizen-avatar {
+      position: absolute;
+      width: 52px;
+      height: 64px;
+      transform: translate(-50%, -50%);
+      transition: left 0.45s linear, top 0.45s linear;
+      z-index: 60;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      filter: drop-shadow(0 6px 8px rgba(0,0,0,0.55));
+    }
+
+    .avatar-tag {
+      background: rgba(15, 23, 42, 0.94);
+      border: 1.5px solid var(--emas);
+      color: #fff;
+      font-size: 0.66rem;
+      font-weight: 800;
+      padding: 1px 7px;
+      border-radius: 7px;
+      white-space: nowrap;
+      margin-bottom: 2px;
+    }
+
+    .avatar-task {
+      background: linear-gradient(90deg, #10b981, #34d399);
+      color: #052e16;
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 6px;
+      margin-top: 2px;
+      white-space: nowrap;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    }
+
+    .walking .avatar-body {
+      animation: bobWalk 0.35s infinite alternate;
+    }
+
+    @keyframes bobWalk {
+      from { transform: translateY(0px); }
+      to { transform: translateY(-5px); }
+    }
+
+    /* MINIMAP RADAR HD */
+    .minimap-box {
+      position: fixed;
+      top: 62px;
+      right: 10px;
+      z-index: 110;
+      width: 150px;
+      height: 94px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 2px solid var(--emas);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    .minimap-label {
+      position: absolute;
+      bottom: 2px;
+      left: 5px;
+      font-size: 0.58rem;
+      font-weight: 800;
+      color: #fde68a;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    /* DOCK BAWAH & LOG AKTIVITAS */
+    .bottom-dock {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      z-index: 120;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
+      gap: 10px;
+    }
+
+    .log-box {
+      pointer-events: auto;
+      width: 340px;
+      max-width: 50vw;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 8px 11px;
+      font-size: 0.72rem;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.45);
+    }
+
+    .log-list {
+      max-height: 68px;
+      overflow-y: auto;
+      margin-top: 4px;
+      color: #cbd5e1;
+      line-height: 1.38;
+    }
+
+    .dpad-box {
+      pointer-events: auto;
+      display: grid;
+      grid-template-columns: repeat(3, 42px);
+      grid-template-rows: repeat(2, 42px);
+      gap: 5px;
+      background: var(--panel);
+      padding: 8px;
+      border-radius: 15px;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+
+    .dpad-btn {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #fff;
+      font-weight: 900;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .dpad-btn:active {
+      background: var(--merah);
+      transform: scale(0.95);
+    }
+
+    /* MODAL POPUP */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(0, 0, 0, 0.76);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 470px;
+      max-height: 86vh;
+      overflow-y: auto;
+      background: #0f172a;
+      border: 2px solid var(--emas);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.75);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 8px;
+    }
+
+    .close-btn {
+      background: var(--merah);
+      border: none;
+      color: #fff;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .ktp-card {
+      background: linear-gradient(135deg, #1d4ed8 0%, #0f172a 100%);
+      border: 2px solid #93c5fd;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .ktp-header {
+      text-align: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255,255,255,0.3);
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+    }
+
+    .ktp-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      margin-bottom: 5px;
+    }
+
+    .shop-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1e293b;
+      padding: 10px;
+      border-radius: 11px;
+      margin-bottom: 8px;
+      border: 1px solid #334155;
+    }
+
+    .buy-btn {
+      background: var(--hijau);
+      color: #052e16;
+      border: none;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- GERBANG LOGIN & REGISTRASI WAJIB -->
+  <div id="authGate">
+    <div class="auth-card">
+      <div class="flag-bar"></div>
+      <div class="auth-title">🇮🇩 SIMULASI KOTA: INDONESIA MERDEKA</div>
+      <div class="auth-subtitle">Edisi HD • Wajib Daftar / Login E-KTP Warga Sebelum Masuk Kota</div>
+
+      <div class="tab-row">
+        <button class="tab-btn active" id="tabRegister" onclick="switchAuthTab('register')">Daftar Warga Baru</button>
+        <button class="tab-btn" id="tabLogin" onclick="switchAuthTab('login')">Login E-KTP</button>
+      </div>
+
+      <!-- FORM DAFTAR -->
+      <div id="registerForm">
+        <div class="form-group">
+          <label>Username Instagram (Wajib & Unik)</label>
+          <input type="text" id="regIg" placeholder="contoh: @yohanessijabat" />
+        </div>
+        <div class="form-group">
+          <label>Nama Lengkap (Bebas)</label>
+          <input type="text" id="regFullName" placeholder="Masukkan nama lengkap Anda" />
+        </div>
+        <div class="form-group">
+          <label>Nama Panggilan di Atas Avatar</label>
+          <input type="text" id="regNickName" maxlength="14" placeholder="Maksimal 14 huruf (contoh: Yoh)" />
+        </div>
+        <div class="form-group">
+          <label>Warna Karakter Avatar</label>
+          <select id="regColor">
+            <option value="#ef4444">Merah Merdeka</option>
+            <option value="#2563eb">Biru Nusantara</option>
+            <option value="#10b981">Hijau Khatulistiwa</option>
+            <option value="#f59e0b">Emas Garuda</option>
+            <option value="#8b5cf6">Ungu Rajawali</option>
+          </select>
+        </div>
+        <div class="rank-info">
+          <strong>Sistem Nomor Urut Anggota & Jabatan Otomatis:</strong><br/>
+          • Anggota #1: <b>Presiden</b> (Otomatis Pemilik Kota)<br/>
+          • Anggota #2 – #50: <b>Perdana Menteri</b><br/>
+          • Anggota #51 – #101: <b>Gubernur</b><br/>
+          • Anggota #102 dst: <b>Masyarakat</b>
+        </div>
+        <button class="btn-primary" onclick="registerCitizen()">Buat E-KTP & Masuk Kota</button>
+      </div>
+
+      <!-- FORM LOGIN -->
+      <div id="loginForm" style="display:none;">
+        <div class="form-group">
+          <label>Masukkan Username Instagram Terdaftar</label>
+          <input type="text" id="loginIg" placeholder="contoh: @yohanessijabat" />
+        </div>
+        <button class="btn-primary" onclick="loginCitizen()">Masuk ke Dalam Kota</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERINGATAN LANDSCAPE UNTUK HP -->
+  <div id="rotateOverlay">
+    <div class="phone-icon"></div>
+    <h2 style="margin-bottom:8px;">Putar HP ke Posisi Miring (Landscape)</h2>
+    <p style="color:#cbd5e1; font-size:0.9rem; max-width:340px;">
+      Tampilan kota HD otomatis dioptimalkan dalam mode layar lebar agar Anda bebas menjelajahi seluruh sudut kota.
+    </p>
+  </div>
+
+  <!-- LAYAR UTAMA GAME -->
+  <div id="gameApp">
+    <!-- HUD ATAS -->
+    <div class="top-hud">
+      <div class="hud-brand">
+        <div class="mini-flag"></div>
+        <div>
+          <div style="font-weight:900; font-size:0.85rem;">INDONESIA MERDEKA <span style="color:#f59e0b;">HD</span></div>
+          <div id="hudIdentity" style="font-size:0.7rem; color:#fde68a;">Memuat E-KTP...</div>
+        </div>
+      </div>
+
+      <div class="hud-stats">
+        <div class="stat-pill">💰 Saldo: <span id="hudMoney">Rp 0</span></div>
+        <div class="stat-pill">⭐ Poin: <span id="hudPoints">0</span></div>
+        <div class="stat-pill">🏛️ Kas AI & Yohanes: <span id="hudOwnerPool">0 Poin</span></div>
+      </div>
+
+      <div class="hud-actions">
+        <button class="hud-btn" onclick="centerOnPlayer()">🎯 Fokus Saya</button>
+        <button class="hud-btn active" id="btnAutoMove" onclick="toggleAutoMove()">🤖 Otomatis: ON</button>
+        <button class="hud-btn" onclick="openModal('ktpModal')">🪪 E-KTP</button>
+        <button class="hud-btn" onclick="openModal('citizenModal')">👥 Warga (<span id="citizenCount">1</span>)</button>
+        <button class="hud-btn" onclick="logoutCitizen()" style="background:#7f1d1d;">Keluar</button>
+      </div>
+    </div>
+
+    <!-- MINIMAP RADAR -->
+    <div class="minimap-box" onclick="centerOnPlayer()" title="Ketuk untuk fokus ke karakter Anda">
+      <canvas id="minimapCanvas" width="150" height="94"></canvas>
+      <div class="minimap-label">🗺️ PETA RADAR HD</div>
+    </div>
+
+    <!-- VIEWPORT PETA BISA DIGESER (PAN/DRAG) -->
+    <div id="mapViewport">
+      <div id="cityWorld">
+        <!-- JALAN RAYA ASPAL HD -->
+        <div class="road-h" style="top: 380px;"></div>
+        <div class="road-h" style="top: 900px;"></div>
+        <div class="road-v" style="left: 480px;"></div>
+        <div class="road-v" style="left: 1180px;"></div>
+        <div class="road-v" style="left: 1860px;"></div>
+
+        <!-- SUNGAI NUSANTARA & JEMBATAN MERAH PUTIH -->
+        <div class="river-h">
+          <div class="river-wave"></div>
+          <div class="bridge" style="left: 469px;"></div>
+          <div class="bridge" style="left: 1169px;"></div>
+          <div class="bridge" style="left: 1849px;"></div>
+        </div>
+
+        <!-- ALUN-ALUN & TUGU MERDEKA HD -->
+        <div class="monument-plaza">
+          <svg width="76" height="96" viewBox="0 0 76 96">
+            <rect x="14" y="76" width="48" height="14" rx="3" fill="#475569"/>
+            <rect x="24" y="64" width="28" height="12" rx="2" fill="#cbd5e1"/>
+            <polygon points="33,64 36,18 40,18 43,64" fill="#f8fafc" stroke="#94a3b8" stroke-width="1"/>
+            <path d="M38 4 C33 11, 35 16, 38 18 C41 16, 43 11, 38 4 Z" fill="#f59e0b"/>
+          </svg>
+          <div style="font-weight:900; font-size:0.75rem; color:#0f172a; margin-top:4px;">TUGU MERDEKA</div>
+          <div style="font-size:0.62rem; color:#334155; font-weight:700;">Alun-Alun Pusat Kota</div>
+        </div>
+
+        <!-- MOBIL PATROLI & ANGKUTAN KOTA HD -->
+        <svg class="city-car" style="top: 394px;" viewBox="0 0 60 30">
+          <rect x="4" y="10" width="52" height="14" rx="5" fill="#d90429"/>
+          <path d="M14 10 L20 3 L40 3 L46 10 Z" fill="#f8fafc"/>
+          <rect x="27" y="1" width="6" height="3" rx="1" fill="#38bdf8"/>
+          <circle cx="15" cy="24" r="5" fill="#0f172a"/>
+          <circle cx="45" cy="24" r="5" fill="#0f172a"/>
+        </svg>
+
+        <svg class="city-car" style="top: 914px; animation-delay: -8s;" viewBox="0 0 60 30">
+          <rect x="4" y="9" width="52" height="15" rx="4" fill="#f59e0b"/>
+          <rect x="10" y="4" width="40" height="8" rx="3" fill="#fef3c7"/>
+          <circle cx="15" cy="24" r="5" fill="#0f172a"/>
+          <circle cx="45" cy="24" r="5" fill="#0f172a"/>
+        </svg>
+
+        <!-- LAYER POHON HD -->
+        <div id="treesLayer"></div>
+
+        <!-- 1. BALAI KOTA MERDEKA (HD SVG) -->
+        <div class="building" style="left: 210px; top: 140px;" onclick="openBuilding('balai')">
+          <span class="building-badge">PUSAT KOTA</span>
+          <svg class="building-svg" viewBox="0 0 80 80">
+            <defs>
+              <linearGradient id="roofRed" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ef4444"/>
+                <stop offset="100%" stop-color="#991b1b"/>
+              </linearGradient>
+            </defs>
+            <rect x="10" y="36" width="60" height="34" rx="4" fill="#f8fafc"/>
+            <rect x="10" y="64" width="60" height="6" fill="#cbd5e1"/>
+            <polygon points="5,36 40,14 75,36" fill="url(#roofRed)"/>
+            <rect x="18" y="38" width="5" height="26" fill="#e2e8f0"/>
+            <rect x="57" y="38" width="5" height="26" fill="#e2e8f0"/>
+            <rect x="33" y="46" width="14" height="24" rx="2" fill="#78350f"/>
+            <circle cx="40" cy="26" r="5" fill="#f59e0b"/>
+            <line x1="40" y1="2" x2="40" y2="14" stroke="#facc15" stroke-width="2.5"/>
+            <rect x="40" y="2" width="14" height="4" fill="#d90429"/>
+            <rect x="40" y="6" width="14" height="4" fill="#ffffff"/>
+          </svg>
+          <div class="building-name">Balai Kota Merdeka</div>
+          <div class="building-sub">Pusat Pemerintahan & Kas Kota</div>
+        </div>
+
+        <!-- 2. TOKO BAJU NUSANTARA (HD SVG) -->
+        <div class="building" style="left: 620px; top: 140px;" onclick="openBuilding('baju')">
+          <span class="building-badge">USAHA</span>
+          <svg class="building-svg" viewBox="0 0 80 80">
+            <rect x="12" y="30" width="56" height="40" rx="5" fill="#1d4ed8"/>
+            <path d="M8 30 L72 30 L64 16 L16 16 Z" fill="#f59e0b"/>
+            <rect x="16" y="30" width="48" height="6" fill="#d97706"/>
+            <path d="M30 40 L24 47 L29 50 L29 63 L51 63 L51 50 L56 47 L50 40 L44 44 L36 44 Z" fill="#ffffff"/>
+            <path d="M36 44 L40 52 L44 44" stroke="#d90429" stroke-width="2" fill="none"/>
+          </svg>
+          <div class="building-name">Toko Baju Nusantara</div>
+          <div class="building-sub">Batik, Ulos & Pakaian Adat</div>
+        </div>
+
+        <!-- 3. RUMAH MAKAN ACEH (HD SVG) -->
+        <div class="building" style="left: 1320px; top: 140px;" onclick="openBuilding('aceh')">
+          <span class="building-badge">KULINER</span>
+          <svg class="building-svg" viewBox="0 0 80 80">
+            <rect x="12" y="34" width="56" height="36" rx="5" fill="#059669"/>
+            <polygon points="8,34 40,14 72,34" fill="#064e3b"/>
+            <circle cx="40" cy="52" r="12" fill="#fef08a"/>
+            <path d="M32 52 Q40 43 48 52" stroke="#b45309" stroke-width="3" fill="none"/>
+            <path d="M34 47 Q40 40 46 47" stroke="#d97706" stroke-width="2" fill="none"/>
+          </svg>
+          <div class="building-name">Rumah Makan Aceh</div>
+          <div class="building-sub">Mie Aceh, Kopi Gayo & Canai</div>
+        </div>
+
+        <!-- 4. RUMAH MAKAN MINANG (HD SVG) -->
+        <div class="building" style="left: 210px; top: 530px;" onclick="openBuilding('minang')">
+          <span class="building-badge">KULINER</span>
+          <svg class="building-svg" viewBox="0 0 80 80">
+            <rect x="14" y="38" width="52" height="32" rx="4" fill="#b91c1c"/>
+            <path d="M6 38 Q24 12 40 30 Q56 12 74 38 L60 40 L20 40 Z" fill="#f59e0b"/>
+            <path d="M14 38 Q26 20 40 32 Q54 20 66 38" stroke="#78350f" stroke-width="2.5" fill="none"/>
+            <rect x="33" y="48" width="14" height="22" rx="2" fill="#fef3c7"/>
+          </svg>
+          <div class="building-name">Rumah Makan Minang</div>
+          <div class="building-sub">Rendang, Dendeng & Teh Talua</div>
+        </div>
+
+        <!-- 5. RUMAH MAKAN BATAK & BPK (HD SVG) -->
+        <div class="building" style="left: 600px; top: 530px;" onclick="openBuilding('batak')">
+          <span class="building-badge">KULINER</span>
+          <svg class="building-svg" viewBox="0 0 80 80">
+            <rect x="16" y="40" width="48" height="30" rx="4" fill="#7c2d12"/>
+            <polygon points="8,40 40,14 72,40" fill="#1e293b" stroke="#ef4444" stroke-width="2.5"/>
+            <polygon points="20,40 40,22 60,40" fill="#dc2626"/>
+            <circle cx="40" cy="54" r="9" fill="#fb923c"/>
+          </svg>
+          <div class="building-name">RM Batak & BPK</div>
+          <div class="building-sub">Saksang, BPK, Arsik & Tuak</div>
+        </div>
+
+        <!-- 6. PROYEK PATUNGAN STASIUN KOTA (HD SVG) -->
+        <div class="building" style="left: 1320px; top: 520px; width: 245px;" onclick="openBuilding('stasiun')">
+          <span class="building-badge" style="background:#38bdf8;">PROYEK KOTA</span>
+          <svg class="building-svg" viewBox="0 0 80 80">
+            <rect x="10" y="28" width="60" height="38" rx="6" fill="#4f46e5"/>
+            <rect x="18" y="35" width="44" height="16" rx="3" fill="#e0e7ff"/>
+            <line x1="40" y1="35" x2="40" y2="51" stroke="#4f46e5" stroke-width="2"/>
+            <circle cx="24" cy="58" r="5" fill="#facc15"/>
+            <circle cx="56" cy="58" r="5" fill="#facc15"/>
+            <rect x="28" y="18" width="24" height="10" rx="3" fill="#ef4444"/>
+          </svg>
+          <div class="building-name">Patungan Stasiun Kota</div>
+          <div class="building-sub" id="stationText">Terkumpul: Rp 1.500.000 / Rp 10.000.000</div>
+          <div class="progress-wrap">
+            <div class="progress-bar" id="stationBar" style="width: 15%;"></div>
+          </div>
+        </div>
+
+        <!-- 7. PUSAT KURIR & LOGISTIK (HD SVG) -->
+        <div class="building" style="left: 1980px; top: 530px;" onclick="openBuilding('logistik')">
+          <span class="building-badge" style="background:#10b981;">KERJA</span>
+          <svg class="building-svg" viewBox="0 0 80 80">
+            <rect x="12" y="30" width="56" height="40" rx="5" fill="#d97706"/>
+            <polygon points="8,30 40,14 72,30" fill="#78350f"/>
+            <rect x="26" y="42" width="28" height="28" rx="2" fill="#fef3c7"/>
+            <line x1="40" y1="42" x2="40" y2="70" stroke="#b45309" stroke-width="2"/>
+          </svg>
+          <div class="building-name">Pusat Kurir & Paket</div>
+          <div class="building-sub">Antar Paket (+Rp 120rb & Poin)</div>
+        </div>
+
+        <!-- 8. DERMAGA & TAMAN PESISIR SUNGAI (HD SVG) -->
+        <div class="building" style="left: 1320px; top: 1000px;" onclick="openBuilding('taman')">
+          <span class="building-badge" style="background:#a7f3d0;">REKREASI</span>
+          <svg class="building-svg" viewBox="0 0 80 80">
+            <circle cx="40" cy="42" r="24" fill="#10b981"/>
+            <circle cx="28" cy="36" r="12" fill="#34d399"/>
+            <circle cx="52" cy="38" r="11" fill="#059669"/>
+            <rect x="37" y="46" width="6" height="22" fill="#78350f"/>
+          </svg>
+          <div class="building-name">Taman Pesisir Garuda</div>
+          <div class="building-sub">Istirahat & Pulihkan Energi Warga</div>
+        </div>
+
+        <!-- CONTAINER AVATAR SEMUA WARGA -->
+        <div id="avatarsLayer"></div>
+      </div>
+    </div>
+
+    <!-- DOCK BAWAH: LOG AKTIVITAS & KONTROL MANUAL -->
+    <div class="bottom-dock">
+      <div class="log-box">
+        <div style="font-weight:800; color:#fde68a;">📢 Aktivitas Warga & Transaksi Kota</div>
+        <div class="log-list" id="cityLogList"></div>
+      </div>
+
+      <div class="dpad-box">
+        <div></div>
+        <button class="dpad-btn" onclick="movePlayerManual(0, -70)">▲</button>
+        <div></div>
+        <button class="dpad-btn" onclick="movePlayerManual(-70, 0)">◄</button>
+        <button class="dpad-btn" onclick="movePlayerManual(0, 70)">▼</button>
+        <button class="dpad-btn" onclick="movePlayerManual(70, 0)">►</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL E-KTP -->
+  <div class="modal-backdrop" id="ktpModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🪪 Kartu Tanda Penduduk (E-KTP)</h3>
+        <button class="close-btn" onclick="closeModal('ktpModal')">✕</button>
+      </div>
+      <div class="ktp-card" id="ktpContent"></div>
+    </div>
+  </div>
+
+  <!-- MODAL DAFTAR WARGA -->
+  <div class="modal-backdrop" id="citizenModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>👥 Daftar Warga Terdaftar</h3>
+        <button class="close-btn" onclick="closeModal('citizenModal')">✕</button>
+      </div>
+      <div id="citizenListContent"></div>
+    </div>
+  </div>
+
+  <!-- MODAL INTERAKSI BANGUNAN -->
+  <div class="modal-backdrop" id="buildingModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="buildingModalTitle">Bangunan Kota</h3>
+        <button class="close-btn" onclick="closeModal('buildingModal')">✕</button>
+      </div>
+      <div id="buildingModalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'simulasi_kota_indonesia_merdeka_hd_v3';
+
+    const DEFAULT_STATE = {
+      citizens: [
+        {
+          idNumber: 1,
+          ig: '@yohanessijabat',
+          fullName: 'Yohanes Sijabat',
+          nickName: 'Yoh',
+          role: 'Presiden',
+          color: '#ef4444',
+          money: 5000000,
+          points: 250,
+          x: 340,
+          y: 280,
+          task: 'Memantau Kota'
+        }
+      ],
+      currentUserIg: null,
+      stationFund: 1500000,
+      stationTarget: 10000000,
+      ownerPointsPool: 250,
+      logs: [
+        '🇮🇩 Kota Indonesia Merdeka (Edisi HD) resmi dibuka! Presiden #1 Yohanes (@yohanessijabat) memimpin kota.'
+      ]
+    };
+
+    let state = loadState();
+    let autoMove = true;
+    let mapOffset = { x: -60, y: -40 };
+    let isDragging = false;
+    let dragStart = { x: 0, y: 0 };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return JSON.parse(JSON.stringify(DEFAULT_STATE));
+        return JSON.parse(raw);
+      } catch (e) {
+        return JSON.parse(JSON.stringify(DEFAULT_STATE));
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function generateTrees() {
+      const coords = [
+        [110, 120], [150, 290], [430, 150], [920, 140], [1060, 260],
+        [1640, 150], [1760, 280], [2140, 160], [2240, 290],
+        [110, 560], [140, 760], [560, 770], [1110, 530], [1110, 790],
+        [1660, 550], [1750, 780], [2260, 560], [2230, 790],
+        [150, 1020], [360, 1060], [640, 1030], [960, 1050], [1680, 1040], [2080, 1030]
+      ];
+      const layer = document.getElementById('treesLayer');
+      layer.innerHTML = coords.map(([x, y]) => `
+        <svg class="tree-hd" style="left:${x}px; top:${y}px;" viewBox="0 0 48 48">
+          <rect x="21" y="30" width="6" height="14" rx="2" fill="#78350f"/>
+          <circle cx="24" cy="22" r="15" fill="#15803d"/>
+          <circle cx="17" cy="25" r="10" fill="#22c55e"/>
+          <circle cx="31" cy="25" r="10" fill="#16a34a"/>
+          <circle cx="24" cy="15" r="9" fill="#4ade80"/>
+        </svg>
+      `).join('');
+    }
+    generateTrees();
+
+    function getRankByNumber(num) {
+      if (num === 1) return 'Presiden';
+      if (num >= 2 && num <= 50) return 'Perdana Menteri';
+      if (num >= 51 && num <= 101) return 'Gubernur';
+      return 'Masyarakat';
+    }
+
+    function normalizeIg(ig) {
+      let clean = ig.trim().toLowerCase();
+      if (!clean) return '';
+      if (!clean.startsWith('@')) clean = '@' + clean;
+      return clean;
+    }
+
+    function switchAuthTab(tab) {
+      document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+      document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+      document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+    }
+
+    function registerCitizen() {
+      const ig = normalizeIg(document.getElementById('regIg').value);
+      const fullName = document.getElementById('regFullName').value.trim();
+      const nickName = document.getElementById('regNickName').value.trim();
+      const color = document.getElementById('regColor').value;
+
+      if (!ig || ig.length < 3) {
+        alert('Username Instagram wajib diisi!');
+        return;
+      }
+      if (!fullName || !nickName) {
+        alert('Nama lengkap dan nama panggilan wajib diisi!');
+        return;
+      }
+
+      const existing = state.citizens.find(c => c.ig === ig);
+      if (existing) {
+        alert('Username Instagram ini sudah terdaftar! Silakan langsung login.');
+        switchAuthTab('login');
+        document.getElementById('loginIg').value = ig;
+        return;
+      }
+
+      const nextNum = state.citizens.length + 1;
+      const role = getRankByNumber(nextNum);
+
+      const newCitizen = {
+        idNumber: nextNum,
+        ig,
+        fullName,
+        nickName,
+        role,
+        color,
+        money: 1000000,
+        points: 10,
+        x: 340 + (nextNum * 25) % 240,
+        y: 390,
+        task: 'Baru Tiba di Kota'
+      };
+
+      state.citizens.push(newCitizen);
+      state.currentUserIg = ig;
+      addLog(`🪪 Warga baru #${nextNum} (${nickName} / ${ig}) resmi terdaftar sebagai ${role}!`);
+      saveState();
+      enterCity();
+    }
+
+    function loginCitizen() {
+      const ig = normalizeIg(document.getElementById('loginIg').value);
+      const user = state.citizens.find(c => c.ig === ig);
+      if (!user) {
+        alert('Username Instagram belum terdaftar. Silakan daftar E-KTP terlebih dahulu.');
+        return;
+      }
+      state.currentUserIg = ig;
+      addLog(`👋 ${user.nickName} (${user.role} #${user.idNumber}) kembali masuk ke kota.`);
+      saveState();
+      enterCity();
+    }
+
+    function logoutCitizen() {
+      state.currentUserIg = null;
+      saveState();
+      document.body.classList.remove('logged-in');
+      document.getElementById('gameApp').style.display = 'none';
+      document.getElementById('authGate').style.display = 'flex';
+    }
+
+    async function lockLandscapeMode() {
+      try {
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock('landscape');
+        }
+      } catch (e) {}
+    }
+
+    function enterCity() {
+      document.getElementById('authGate').style.display = 'none';
+      document.getElementById('gameApp').style.display = 'block';
+      document.body.classList.add('logged-in');
+      lockLandscapeMode();
+      centerOnPlayer();
+      renderAll();
+    }
+
+    function getCurrentUser() {
+      return state.citizens.find(c => c.ig === state.currentUserIg);
+    }
+
+    function formatRupiah(num) {
+      return 'Rp ' + num.toLocaleString('id-ID');
+    }
+
+    function addLog(msg) {
+      const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      state.logs.unshift(`[${time}] ${msg}`);
+      if (state.logs.length > 30) state.logs.pop();
+    }
+
+    function centerOnPlayer() {
+      const me = getCurrentUser();
+      if (!me) return;
+      mapOffset.x = (window.innerWidth / 2) - me.x;
+      mapOffset.y = (window.innerHeight / 2) - me.y;
+      updateMapTransform();
+    }
+
+    function renderMinimap() {
+      const canvas = document.getElementById('minimapCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const sx = 150 / 2400;
+      const sy = 94 / 1500;
+
+      ctx.fillStyle = '#14532d';
+      ctx.fillRect(0, 0, 150, 94);
+
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(0, 1180 * sy, 150, 115 * sy);
+
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(0, 380 * sy, 150, 88 * sy);
+      ctx.fillRect(0, 900 * sy, 150, 88 * sy);
+      ctx.fillRect(480 * sx, 0, 88 * sx, 1180 * sy);
+      ctx.fillRect(1180 * sx, 0, 88 * sx, 1180 * sy);
+      ctx.fillRect(1860 * sx, 0, 88 * sx, 1180 * sy);
+
+      state.citizens.forEach(c => {
+        ctx.fillStyle = c.ig === state.currentUserIg ? '#facc15' : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(c.x * sx, c.y * sy, c.ig === state.currentUserIg ? 3.5 : 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function renderAll() {
+      const me = getCurrentUser();
+      if (!me) return;
+
+      document.getElementById('hudIdentity').textContent =
+        `#${me.idNumber} ${me.nickName} • ${me.role} (${me.ig})`;
+      document.getElementById('hudMoney').textContent = formatRupiah(me.money);
+      document.getElementById('hudPoints').textContent = `${me.points} Poin`;
+      document.getElementById('hudOwnerPool').textContent = `${state.ownerPointsPool} Poin`;
+      document.getElementById('citizenCount').textContent = state.citizens.length;
+
+      const pct = Math.min(100, Math.round((state.stationFund / state.stationTarget) * 100));
+      document.getElementById('stationText').textContent =
+        `Terkumpul: ${formatRupiah(state.stationFund)} / ${formatRupiah(state.stationTarget)} (${pct}%)`;
+      document.getElementById('stationBar').style.width = pct + '%';
+
+      const logEl = document.getElementById('cityLogList');
+      logEl.innerHTML = state.logs.map(l => `<div>• ${l}</div>`).join('');
+
+      const layer = document.getElementById('avatarsLayer');
+      layer.innerHTML = state.citizens.map(c => `
+        <div class="citizen-avatar walking" style="left:${c.x}px; top:${c.y}px;">
+          <div class="avatar-tag">#${c.idNumber} ${c.nickName}</div>
+          <svg class="avatar-body" width="32" height="34" viewBox="0 0 32 34">
+            <ellipse cx="16" cy="31" rx="8" ry="2.5" fill="rgba(0,0,0,0.4)"/>
+            <circle cx="16" cy="8" r="6.5" fill="#fde68a"/>
+            <path d="M10 6 Q16 1 22 6" stroke="#1e293b" stroke-width="2.5" fill="none"/>
+            <rect x="8" y="15" width="16" height="13" rx="4" fill="${c.color}"/>
+            <rect x="10" y="27" width="4.5" height="5" rx="1" fill="#0f172a"/>
+            <rect x="17.5" y="27" width="4.5" height="5" rx="1" fill="#0f172a"/>
+          </svg>
+          <div class="avatar-task">${c.task}</div>
+        </div>
+      `).join('');
+
+      renderMinimap();
+    }
+
+    function toggleAutoMove() {
+      autoMove = !autoMove;
+      const btn = document.getElementById('btnAutoMove');
+      btn.textContent = autoMove ? '🤖 Otomatis: ON' : '🕹️ Manual: ON';
+      btn.classList.toggle('active', autoMove);
+    }
+
+    function movePlayerManual(dx, dy) {
+      const me = getCurrentUser();
+      if (!me) return;
+      autoMove = false;
+      const btn = document.getElementById('btnAutoMove');
+      btn.textContent = '🕹️ Manual: ON';
+      btn.classList.remove('active');
+
+      me.x = Math.max(60, Math.min(2320, me.x + dx));
+      me.y = Math.max(80, Math.min(1420, me.y + dy));
+      me.task = 'Jalan Manual';
+      saveState();
+      renderAll();
+    }
+
+    const ACTIVITIES = [
+      { task: 'Mengantar Paket 📦', x: 2020, y: 620 },
+      { task: 'Belanja Batik 👕', x: 690, y: 260 },
+      { task: 'Makan Mie Aceh 🍜', x: 1380, y: 260 },
+      { task: 'Makan Rendang 🍛', x: 280, y: 650 },
+      { task: 'Makan BPK 🍖', x: 670, y: 650 },
+      { task: 'Cek Stasiun 🚆', x: 1390, y: 650 },
+      { task: 'Foto di Tugu 🇮🇩', x: 940, y: 640 },
+      { task: 'Santai di Taman 🌳', x: 1380, y: 1080 }
+    ];
+
+    setInterval(() => {
+      if (!state.currentUserIg) return;
+      state.citizens.forEach(c => {
+        if (c.ig === state.currentUserIg && !autoMove) return;
+        if (Math.random() < 0.38) {
+          const act = ACTIVITIES[Math.floor(Math.random() * ACTIVITIES.length)];
+          c.task = act.task;
+          c.x += (act.x - c.x) * 0.28 + (Math.random() * 50 - 25);
+          c.y += (act.y - c.y) * 0.28 + (Math.random() * 50 - 25);
+        } else {
+          c.x = Math.max(80, Math.min(2300, c.x + (Math.random() * 90 - 45)));
+          c.y = Math.max(100, Math.min(1400, c.y + (Math.random() * 90 - 45)));
+        }
+      });
+      saveState();
+      renderAll();
+    }, 2300);
+
+    const viewport = document.getElementById('mapViewport');
+    const world = document.getElementById('cityWorld');
+
+    function updateMapTransform() {
+      const minX = Math.min(0, window.innerWidth - 2400);
+      const minY = Math.min(0, window.innerHeight - 1500);
+      mapOffset.x = Math.max(minX, Math.min(0, mapOffset.x));
+      mapOffset.y = Math.max(minY, Math.min(0, mapOffset.y));
+      world.style.transform = `translate3d(${mapOffset.x}px, ${mapOffset.y}px, 0)`;
+    }
+
+    viewport.addEventListener('pointerdown', e => {
+      if (e.target.closest('.building')) return;
+      isDragging = true;
+      dragStart = { x: e.clientX - mapOffset.x, y: e.clientY - mapOffset.y };
+    });
+
+    window.addEventListener('pointermove', e => {
+      if (!isDragging) return;
+      mapOffset.x = e.clientX - dragStart.x;
+      mapOffset.y = e.clientY - dragStart.y;
+      updateMapTransform();
+    });
+
+    window.addEventListener('pointerup', () => {
+      isDragging = false;
+    });
+
+    function openModal(id) {
+      const me = getCurrentUser();
+      if (id === 'ktpModal' && me) {
+        document.getElementById('ktpContent').innerHTML = `
+          <div class="ktp-header">REPUBLIK INDONESIA MERDEKA • E-KTP WARGA</div>
+          <div class="ktp-row"><span>Nomor Anggota:</span><b>#${me.idNumber}</b></div>
+          <div class="ktp-row"><span>Jabatan Kota:</span><b>${me.role}</b></div>
+          <div class="ktp-row"><span>Nama Lengkap:</span><b>${me.fullName}</b></div>
+          <div class="ktp-row"><span>Nama Panggilan:</span><b>${me.nickName}</b></div>
+          <div class="ktp-row"><span>Instagram ID:</span><b>${me.ig}</b></div>
+          <div class="ktp-row"><span>Saldo Warga:</span><b>${formatRupiah(me.money)}</b></div>
+          <div class="ktp-row"><span>Poin Kontribusi:</span><b>${me.points} Poin</b></div>
+        `;
+      }
+      if (id === 'citizenModal') {
+        document.getElementById('citizenListContent').innerHTML = state.citizens.map(c => `
+          <div class="shop-item">
+            <div>
+              <div style="font-weight:800;">#${c.idNumber} ${c.fullName} (${c.nickName})</div>
+              <div style="font-size:0.75rem; color:#fde68a;">${c.role} • ${c.ig} • ${c.task}</div>
+            </div>
+            <div style="font-weight:800; color:#6ee7b7;">${c.points} Poin</div>
+          </div>
+        `).join('');
+      }
+      document.getElementById(id).style.display = 'flex';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    const SHOPS = {
+      baju: {
+        title: '👕 Toko Baju Nusantara',
+        items: [
+          { name: 'Kemeja Batik Merdeka', price: 150000, pts: 15 },
+          { name: 'Kain Ulos Batak Premium', price: 250000, pts: 25 },
+          { name: 'Setelan Pakaian Adat Nusantara', price: 400000, pts: 40 }
+        ]
+      },
+      aceh: {
+        title: '🍜 Rumah Makan Aceh',
+        items: [
+          { name: 'Mie Aceh Kepiting Spesial', price: 45000, pts: 5 },
+          { name: 'Kopi Gayo Sanger', price: 20000, pts: 3 }
+        ]
+      },
+      minang: {
+        title: '🍛 Rumah Makan Minang',
+        items: [
+          { name: 'Nasi Rendang Daging Sapi', price: 40000, pts: 5 },
+          { name: 'Dendeng Balado + Teh Talua', price: 50000, pts: 6 }
+        ]
+      },
+      batak: {
+        title: '🍖 Rumah Makan Batak & BPK',
+        items: [
+          { name: 'Paket BPK Panggang + Daun Ubi', price: 55000, pts: 6 },
+          { name: 'Ikan Mas Arsik Toba', price: 65000, pts: 8 }
+        ]
+      }
+    };
+
+    function openBuilding(type) {
+      const titleEl = document.getElementById('buildingModalTitle');
+      const bodyEl = document.getElementById('buildingModalBody');
+
+      if (SHOPS[type]) {
+        titleEl.textContent = SHOPS[type].title;
+        bodyEl.innerHTML = SHOPS[type].items.map(item => `
+          <div class="shop-item">
+            <div>
+              <div style="font-weight:800;">${item.name}</div>
+              <div style="font-size:0.75rem; color:#cbd5e1;">Harga: ${formatRupiah(item.price)} • +${item.pts} Poin untuk AI & Yohanes</div>
+            </div>
+            <button class="buy-btn" onclick="buyProduct('${item.name}', ${item.price}, ${item.pts})">Beli</button>
+          </div>
+        `).join('');
+      } else if (type === 'stasiun') {
+        titleEl.textContent = '🚆 Patungan Pembangunan Stasiun Kota';
+        bodyEl.innerHTML = `
+          <p style="font-size:0.85rem; margin-bottom:12px;">
+            Mari patungan membangun Stasiun Kota agar transportasi warga makin maju!
+          </p>
+          <div class="shop-item">
+            <div><b>Patungan Rp 100.000</b><div style="font-size:0.75rem;">+15 Poin Kontribusi</div></div>
+            <button class="buy-btn" onclick="donateStation(100000, 15)">Patungan</button>
+          </div>
+          <div class="shop-item">
+            <div><b>Patungan Rp 500.000</b><div style="font-size:0.75rem;">+80 Poin Kontribusi</div></div>
+            <button class="buy-btn" onclick="donateStation(500000, 80)">Patungan</button>
+          </div>
+        `;
+      } else if (type === 'logistik') {
+        titleEl.textContent = '📦 Pusat Kurir & Pengantaran Paket';
+        bodyEl.innerHTML = `
+          <p style="font-size:0.85rem; margin-bottom:12px;">
+            Antar paket keliling kota untuk mendapatkan gaji langsung dan poin warga!
+          </p>
+          <button class="btn-primary" onclick="deliverPackage()">Mulai Antar Paket (+Rp 120.000 & +10 Poin)</button>
+        `;
+      } else if (type === 'taman') {
+        titleEl.textContent = '🌳 Taman Pesisir Garuda';
+        bodyEl.innerHTML = `
+          <p style="font-size:0.85rem; margin-bottom:12px;">
+            Nikmati pemandangan Sungai Nusantara dan Jembatan Merah Putih sambil bersantai bersama warga lainnya!
+          </p>
+          <button class="btn-primary" onclick="relaxAtPark()">Bersantai di Taman (+5 Poin)</button>
+        `;
+      } else {
+        titleEl.textContent = '🏛️ Balai Kota Merdeka';
+        bodyEl.innerHTML = `
+          <p style="font-size:0.85rem; line-height:1.55;">
+            Selamat datang di pusat pemerintahan <b>Simulasi Kota: INDONESIA MERDEKA</b>.<br/><br/>
+            • Total Warga Terdaftar: <b>${state.citizens.length} Orang</b><br/>
+            • Total Poin Terkumpul (AI & Pemilik Yohanes): <b>${state.ownerPointsPool} Poin</b><br/>
+            • Dana Stasiun Kota: <b>${formatRupiah(state.stationFund)}</b>
+          </p>
+        `;
+      }
+
+      document.getElementById('buildingModal').style.display = 'flex';
+    }
+
+    function buyProduct(itemName, price, pts) {
+      const me = getCurrentUser();
+      if (!me) return;
+      if (me.money < price) {
+        alert('Saldo Anda tidak mencukupi! Silakan antar paket di Pusat Kurir.');
+        return;
+      }
+      me.money -= price;
+      me.points += pts;
+      state.ownerPointsPool += pts;
+      me.task = `Membeli ${itemName}`;
+      addLog(`🛍️ ${me.nickName} (${me.ig}) membeli ${itemName} (+${pts} poin masuk ke AI & Yohanes).`);
+      saveState();
+      renderAll();
+      closeModal('buildingModal');
+    }
+
+    function donateStation(amount, pts) {
+      const me = getCurrentUser();
+      if (!me) return;
+      if (me.money < amount) {
+        alert('Saldo tidak mencukupi!');
+        return;
+      }
+      me.money -= amount;
+      me.points += pts;
+      state.stationFund += amount;
+      state.ownerPointsPool += pts;
+      me.task = 'Patungan Stasiun 🚆';
+      addLog(`🚆 ${me.nickName} menyumbang ${formatRupiah(amount)} untuk pembangunan Stasiun Kota!`);
+      saveState();
+      renderAll();
+      closeModal('buildingModal');
+    }
+
+    function deliverPackage() {
+      const me = getCurrentUser();
+      if (!me) return;
+      me.money += 120000;
+      me.points += 10;
+      me.x = 2020;
+      me.y = 620;
+      me.task = 'Mengantar Paket 📦';
+      addLog(`📦 ${me.nickName} menyelesaikan pengantaran paket keliling kota (+Rp 120.000).`);
+      saveState();
+      renderAll();
+      closeModal('buildingModal');
+    }
+
+    function relaxAtPark() {
+      const me = getCurrentUser();
+      if (!me) return;
+      me.points += 5;
+      me.x = 1380;
+      me.y = 1080;
+      me.task = 'Santai di Taman 🌳';
+      addLog(`🌳 ${me.nickName} bersantai di Taman Pesisir Garuda (+5 Poin).`);
+      saveState();
+      renderAll();
+      closeModal('buildingModal');
+    }
+
+    if (state.currentUserIg && getCurrentUser()) {
+      enterCity();
+    }
+  </script>
+</body>
+</html>
